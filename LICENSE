@@ -1,0 +1,73 @@
+ZQX PROPRIETARY SOFTWARE LICENSE AGREEMENT (EULA)
+
+Copyright (c) 2026 ZQX Net (https://zqxnet.com). All rights reserved.
+SaaS Console: https://console.zqxnet.com | Split-DNS: *.zqxnode.com
+
+IMPORTANT: THIS SOFTWARE AND ITS SOURCE CODE ARE CONFIDENTIAL AND PROPRIETARY
+TO ZQX NET. NO PART OF ZQX IS OPEN-SOURCE SOFTWARE OR SUBJECT TO ANY SOURCE
+CONVERSION LICENSE.
+
+1. PROPRIETARY OWNERSHIP
+   All ZQX software components—including `zqx` (CLI), `zqxd` (node daemon),
+   `zqx-tray` and `ZQX.app` (desktop clients), `zqxnet` (SDK), `zqx-core`,
+   `zqx-proto`, `zqx-tunnel`, `zqx-ns`, `zqx-stir`, `zqx-wasm`, `zqx-control`
+   (coordination server), `zqx-console`, and `zqx-saas`—and all related source
+   code, object code, protocols, and documentation (collectively, the "Software")
+   are the exclusive proprietary property of ZQX Net and its licensors.
+
+2. LICENSE GRANT BY TIER
+   Subject to compliance with this Agreement and applicable subscription payment,
+   ZQX Net grants Customer a revocable, non-exclusive, non-transferable,
+   non-sublicensable license to install and use the compiled binary Software
+   solely according to Customer's active plan:
+
+   (a) Personal Plan (Free):
+       Free of charge for up to ten (10) users on the ZQX Hosted SaaS coordination
+       platform (`console.zqxnet.com`), with unlimited connected user devices.
+       Does NOT include rights to operate self-hosted coordination servers.
+
+   (b) Starter Plan (Per User):
+       Billed per active user seat per month on the ZQX Hosted SaaS coordination
+       platform. Includes team SSO, granular ACL policies, and MagicDNS. Does NOT
+       include rights to operate self-hosted coordination servers.
+
+   (c) Premium Plan (Per User):
+       Billed per active user seat per month on the ZQX Hosted SaaS coordination
+       platform. Adds Category-5 strict post-quantum enforcement (`ML-KEM-1024` /
+       `ML-DSA-87`), real-time SIEM audit export, and cross-xnet sharing. Does NOT
+       include rights to operate self-hosted coordination servers.
+
+   (d) Enterprise Plan (Per User + Per Self-Hosted Coordinator):
+       Billed per active user seat plus per licensed self-hosted coordinator
+       instance (`max_coordinators`). Grants the right to deploy and operate the
+       compiled `zqx-control` and `zqx-console` binaries in sovereign, on-premises,
+       VPC, or air-gapped environments up to the exact number of licensed
+       coordinators encoded in Customer's cryptographically signed `ZqxLicense`.
+       Unlicensed local `zqx-control` instances may be used solely for internal
+       non-production evaluation during the built-in 14-day evaluation period.
+
+3. RESTRICTIONS
+   Customer shall NOT (and shall not permit any third party to):
+   (a) Copy, publish, disclose, or distribute any ZQX source code.
+   (b) Reverse engineer, decompile, disassemble, or attempt to derive the source
+       code or signing keys of the Software, except to the minimum extent
+       expressly mandated by non-waivable applicable law.
+   (c) Circumvent, tamper with, or bypass any `ZqxLicense` signature checks,
+       user seat limits, coordinator count limits, or evaluation timers.
+   (d) Host, resell, white-label, or offer the Software as a managed service or
+       competing coordination service to third parties without written Enterprise
+       MSP authorization from ZQX Net.
+
+4. WARRANTIES, SLA & INDEMNIFICATION
+   Personal, Starter, and Premium tiers are provided "AS IS" without warranty of
+   any kind to the maximum extent permitted by law. Enterprise Customers with an
+   executed Master Services Agreement (MSA) receive contractual uptime SLAs and
+   intellectual property indemnification as specified in their MSA.
+
+5. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL ZQX NET BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+   CONSEQUENTIAL, OR EXEMPLARY DAMAGES ARISING OUT OF OR RELATED TO USE OF THE
+   SOFTWARE.
+
+For Enterprise licensing, self-hosted coordinator seats, and commercial inquiries:
+Website: https://zqxnet.com | Email: sales@zqxnet.com | Legal: legal@zqxnet.com
