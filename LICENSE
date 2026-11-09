@@ -33,8 +33,7 @@ CONVERSION LICENSE.
 
    (c) Premium Plan (Per User):
        Billed per active user seat per month on the ZQX Hosted SaaS coordination
-       platform. Adds Category-5 strict post-quantum enforcement (`ML-KEM-1024` /
-       `ML-DSA-87`), real-time SIEM audit export, and cross-xnet sharing. Does NOT
+       platform. Adds real-time SIEM audit export and cross-xnet sharing. Does NOT
        include rights to operate self-hosted coordination servers.
 
    (d) Enterprise Plan (Per User + Per Self-Hosted Coordinator):

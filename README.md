@@ -5,7 +5,7 @@
   <p><strong>Zero Trust. Quantum Safe. Universal eXchange.</strong></p>
 </div>
 
-[ZQX](https://zqxnet.com) is a zero-trust fabric overlay network that connects your devices, servers, and cloud workloads securely from anywhere, with hybrid post-quantum cryptography by default.
+[ZQX](https://zqxnet.com) is a zero-trust fabric overlay network that connects your devices, servers, and cloud workloads securely from anywhere. From v0.3.0, every connection uses pinned mutual TLS 1.3 with the hybrid post-quantum `X25519MLKEM768` key exchange (X25519 + FIPS 203 ML-KEM-768).
 
 This repository hosts **official ZQX binary installers, portable packages, and user documentation**. To manage your network, users, and access control policies, sign in to the ZQX Console at [**console.zqxnet.com**](https://console.zqxnet.com).
 
@@ -62,9 +62,9 @@ ZQX software is proprietary and available under free and commercial plans metere
 
 | Plan | Users | Coordination Plane | Key Features |
 | :--- | :--- | :--- | :--- |
-| **Personal** | **Free up to 10 users** | ZQX Hosted Cloud (`console.zqxnet.com`) | Hybrid Post-Quantum Crypto (`X25519 + ML-KEM-768` & `ML-DSA-65`), Fabric DNS, unlimited user devices |
+| **Personal** | **Free up to 10 users** | ZQX Hosted Cloud (`console.zqxnet.com`) | Fabric DNS, unlimited user devices |
 | **Starter** | Per user / month | ZQX Hosted Cloud | Team SSO, granular ACL policies, Fabric DNS |
-| **Premium** | Per user / month | ZQX Hosted Cloud | Category-5 Strict PQC (`ML-KEM-1024` / `ML-DSA-87`), SIEM audit log streaming, cross-xnet sharing |
+| **Premium** | Per user / month | ZQX Hosted Cloud | SIEM audit log streaming, cross-xnet sharing |
 | **Enterprise** | Per user + **per coordinator** | **Self-Hosted Coordinators** + Hosted Cloud | Sovereign / on-prem / air-gapped coordination servers (14-day built-in evaluation mode), 100G throughput, custom SLA |
 
 See [LICENSE](LICENSE) for full End-User License Agreement terms. For Enterprise coordinator licensing, contact [sales@zqxnet.com](mailto:sales@zqxnet.com).
