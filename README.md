@@ -18,8 +18,9 @@ Pre-built signed installers and packages for Windows, macOS, and Linux are avail
 | Platform | Download | Description |
 | :--- | :--- | :--- |
 | **Windows (Installer)** | [**`zqx-setup-x86_64.exe`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-x86_64.exe) | Standalone Windows Setup Wizard & Silent Enterprise Installer (System Tray, Service, CLI, Wintun) |
+| **Windows on ARM (Installer)** | [**`zqx-setup-arm64.exe`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-arm64.exe) | The same installer for arm64 Windows devices |
 | **Windows (Portable)** | [**`zqx-windows-x86_64.zip`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-windows-x86_64.zip) | Portable zip archive: System Tray App (`zqx-tray.exe`), Windows Service, CLI, & Wintun L3 Driver |
-| **macOS (Installer)** | [**`zqx-macos-arm64.pkg`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.pkg) | Apple Installer Package: installs `ZQX.app` and symlinks CLI to `/usr/local/bin` |
+| **macOS (Installer)** | [**`zqx-macos-arm64.pkg`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.pkg) | Apple Installer Package: installs `ZQX.app`, the `zqxd` LaunchDaemon (virtual adapter) and the CLI in `/usr/local/bin` |
 | **macOS (Disk Image)** | [**`zqx-macos-arm64.dmg`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.dmg) | Drag-and-drop Disk Image for easy installation into `/Applications` |
 | **macOS (App Bundle)** | [**`zqx-macos-arm64-app.zip`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64-app.zip) | Portable SwiftUI Menu Bar application bundle (`ZQX.app`) |
 | **macOS (CLI)** | [**`zqx-macos-arm64.tar.gz`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.tar.gz) | Headless command-line binaries (`zqx`, `zqxd`, `zqx-stir`) |
