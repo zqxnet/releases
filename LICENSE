@@ -28,7 +28,7 @@ CONVERSION LICENSE.
 
    (b) Starter Plan (Per User):
        Billed per active user seat per month on the ZQX Hosted SaaS coordination
-       platform. Includes team SSO, granular ACL policies, and MagicDNS. Does NOT
+       platform. Includes team SSO, granular ACL policies, and Fabric DNS. Does NOT
        include rights to operate self-hosted coordination servers.
 
    (c) Premium Plan (Per User):

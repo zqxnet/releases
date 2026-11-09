@@ -62,8 +62,8 @@ ZQX software is proprietary and available under free and commercial plans metere
 
 | Plan | Users | Coordination Plane | Key Features |
 | :--- | :--- | :--- | :--- |
-| **Personal** | **Free up to 10 users** | ZQX Hosted Cloud (`console.zqxnet.com`) | Hybrid Post-Quantum Crypto (`X25519 + ML-KEM-768` & `ML-DSA-65`), MagicDNS, unlimited user devices |
-| **Starter** | Per user / month | ZQX Hosted Cloud | Team SSO, granular ACL policies, MagicDNS |
+| **Personal** | **Free up to 10 users** | ZQX Hosted Cloud (`console.zqxnet.com`) | Hybrid Post-Quantum Crypto (`X25519 + ML-KEM-768` & `ML-DSA-65`), Fabric DNS, unlimited user devices |
+| **Starter** | Per user / month | ZQX Hosted Cloud | Team SSO, granular ACL policies, Fabric DNS |
 | **Premium** | Per user / month | ZQX Hosted Cloud | Category-5 Strict PQC (`ML-KEM-1024` / `ML-DSA-87`), SIEM audit log streaming, cross-xnet sharing |
 | **Enterprise** | Per user + **per coordinator** | **Self-Hosted Coordinators** + Hosted Cloud | Sovereign / on-prem / air-gapped coordination servers (14-day built-in evaluation mode), 100G throughput, custom SLA |
 

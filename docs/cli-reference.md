@@ -10,7 +10,7 @@ The `zqx` command-line tool is used to interact with and manage your zqx fabric 
 - Measure network throughput with speedtest
 - Monitor the fabric network
 
-The tool automatically detects the control socket location (similar to Tailscale's `tailscale` command), so you typically don't need to specify connection details.
+The tool automatically detects the control socket location, so you typically don't need to specify connection details.
 
 ## Socket Detection
 
@@ -288,26 +288,6 @@ zqx ping node2
 # Measure actual throughput
 zqx speedtest node2 -d 5
 ```
-
----
-
-## Comparison with Tailscale
-
-The `zqx` CLI is designed to be similar to Tailscale's `tailscale` command:
-
-| Tailscale | zqx | Description |
-|-----------|-----|-------------|
-| `tailscale status` | `zqx status` | Show node and peer status |
-| `tailscale ping` | `zqx ping` | Ping a peer |
-| `tailscale netcheck` | `zqx speedtest` | Network diagnostics (speedtest) |
-| `tailscale up` | N/A | Network setup (handled by zqxd) |
-| `tailscale down` | N/A | Network teardown (handled by zqxd) |
-
-**Key Differences:**
-- `zqx` uses QUIC tunnels instead of WireGuard
-- Socket auto-detection works the same way
-- Commands are simpler (no `up`/`down` - daemon handles connection lifecycle)
-- Speedtest is built-in (Tailscale uses separate tools)
 
 ---
 
