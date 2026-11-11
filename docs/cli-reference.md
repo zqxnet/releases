@@ -291,6 +291,46 @@ zqx speedtest node2 -d 5
 
 ---
 
+## Coordinator Pinning (`zqxd`)
+
+Every node has a persistent hybrid identity in its state file: a classical key (Ed25519, or ECDSA P-256) and an ML-DSA-65 key. Its node ID (48 hex characters) is a hash of both public keys, so dialing a node by its ID pins both. Every connection proves both keys: the TLS handshake signs with the classical key, and each side then signs the session with its ML-DSA-65 key. Nodes also pin the coordinator's key:
+
+| How | Example |
+| :--- | :--- |
+| Flag or environment | `zqxd --server coord.example.com:443 --coordinator-key <coordinator node ID>` (`ZQX_COORDINATOR_KEY`) |
+| Auth key suffix | `zqxd --auth-key <key>.<coordinator node ID>` |
+| First use | With neither, the first coordinator reached is pinned and saved in the state file. |
+
+A coordinator presenting a different key is refused. The coordinator prints its node ID at startup (`Coordinator node ID: …`).
+
+---
+
+## Sealed State (`zqxd`)
+
+The state file (node keys, auth token, coordinator pins) is encrypted with a key that only this machine can unseal. It's on by default and needs no setup:
+
+| Platform | Sealed with |
+| :--- | :--- |
+| Linux | `systemd-creds`: the TPM 2.0 plus the host credential key when the TPM works (needs the `libtss2` libraries), else the host key alone (`/var/lib/systemd/credential.secret`, root only) |
+| macOS | The System keychain (the root LaunchDaemon) |
+| Windows | A non-exportable key in the TPM (Platform Crypto Provider), else DPAPI with the machine key |
+
+The key is unsealed once when `zqxd` starts. A copy of the state file is useless on another machine. `zqx status` shows the protection in use (`State Protection: Sealed (TPM 2.0 and host key (systemd-creds))`). A plain state file from an earlier release is sealed on first start, and the node keeps its identity.
+
+`ZQX_STATE_SEAL` sets the behaviour:
+
+| Value | Behaviour |
+| :--- | :--- |
+| `auto` (default) | Seal wherever a TPM or keystore is available; otherwise keep the plain, owner-only file |
+| `require` | Refuse to start without one |
+| `off` | Plain, owner-only file |
+
+A user-run `zqxd` (not root, SYSTEM or the LaunchDaemon) and containers without `systemd-creds` keep a plain file.
+
+**If the state can't be unsealed** (TPM cleared, keychain reset, disk moved to another machine, OS reinstalled), `zqxd` keeps the file as `<state>.unsealable`, starts with a new identity and says so in `zqx status` (`State Problem:`) and the tray. Join again with `zqx up --auth-key <key>`, or from the tray.
+
+---
+
 ## See Also
 
 - [README.md](../README.md) - Project overview and architecture
