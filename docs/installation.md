@@ -14,6 +14,7 @@ Download the native setup executable from the [Releases Page](https://github.com
 - Installs binaries (`zqx.exe`, `zqxd.exe`, `zqx-tray.exe`, `zqx-stir.exe`) and the Wintun adapter driver (with its licence, `WINTUN-LICENSE.txt`) to `C:\Program Files\ZQX`.
 - Adds `C:\Program Files\ZQX` to the system `PATH`.
 - Registers and starts the Windows Service `ZQXD` with auto-restart on failure.
+- The CLI and tray talk to the service over the protected named pipe `\\.\pipe\ProtectedPrefix\Administrators\ZQX\zqxd`. Any logged-on user can read status. Changes (`zqx up`, `down`, profile switches) need a member of the Administrators group, elevated or not. A `zqxd.exe` run by hand without elevation can't create that pipe: set `ZQX_PIPE` (for example `\\.\pipe\zqxd-dev`) for both `zqxd` and `zqx`.
 - Configures persistent state directory at `C:\ProgramData\ZQX`.
 - Places Start Menu and Desktop shortcuts and launches the notification tray app `zqx-tray.exe`.
 
@@ -41,9 +42,11 @@ Download `zqx-macos-arm64.pkg` from the [Releases Page](https://github.com/zqxne
 - Automatically symlinks CLI binaries (`zqx`, `zqxd`, `zqx-stir`) to `/usr/local/bin/`.
 - Sets up system PATH support in `/etc/paths.d/zqx`.
 - Installs the `zqxd` LaunchDaemon (`/Library/LaunchDaemons/com.zqxnet.zqxd.plist`). It runs as root so it can create the `utun` virtual adapter, starts at boot and restarts if it exits. Logs go to `/var/log/zqxd.log` (rotated).
-- Members of the `admin` group control the daemon with `zqx` and the menu bar app through `/var/run/zqx/zqxd.sock`. Other users can't connect to it.
+- Members of the `admin` group control the daemon with `zqx` and the menu bar app through `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0660`). Other users can't connect to it.
 - Keeps the node identity and state in `/Library/Application Support/ZQX` (root-only).
 - Launches the SwiftUI Menu Bar app.
+
+Check the daemon with `sudo launchctl print system/com.zqxnet.zqxd` or `zqx status`.
 
 **Command-line installation:**
 ```bash
