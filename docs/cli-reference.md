@@ -1,338 +1,322 @@
-# zqx CLI Reference
+# zqx CLI reference
 
-The `zqx` command-line tool is used to interact with and manage your zqx fabric network node. It communicates with the `zqxd` daemon via a local Unix socket.
+`zqx` is the command-line client of a ZQX node. It sends each command to the local `zqxd` daemon. The daemon does the work: it talks to the coordinator and to the peers.
 
-## Overview
+The diagram shows the path of a command.
 
-`zqx` provides commands to:
-- View node status and peer information
-- Test connectivity with ping
-- Measure network throughput with speedtest
-- Monitor the fabric network
+```mermaid
+flowchart LR
+    U[zqx command] -->|Unix socket or named pipe| D[zqxd daemon]
+    D -->|control session| C[Coordinator]
+    D <-->|fabric connections| P[Peers]
+```
 
-The tool automatically detects the control socket location, so you typically don't need to specify connection details.
+## Find the daemon
 
-## Socket Detection
+`zqx` finds the daemon in this order:
 
-The `zqx` tool automatically finds the `zqxd` control socket using the following priority:
+1. The `--socket <path>` option.
+2. The `ZQX_SOCKET` environment variable.
+3. `$HOME/.zqx/zqxd.sock`, if it exists.
+4. `/var/run/zqx/zqxd.sock`, if it exists. The macOS package and the Linux service use this path.
+5. `/tmp/zqxd.sock`.
 
-1. **`ZQX_SOCKET` environment variable** (highest priority)
-2. **`~/.zqx/zqxd.sock`** (user home directory)
-3. **`/var/run/zqx/zqxd.sock`** (system-wide location)
-4. **`/tmp/zqxd.sock`** (temporary location, common in containers)
-
-The socket path can be manually specified with `--socket`, but this is typically not needed.
+On Windows, `zqx` and the service use a protected named pipe. Refer to the [installation guide](installation.md#windows). Usually you do not need `--socket`.
 
 ## Commands
 
+| Command | What it does |
+| --- | --- |
+| [`zqx up`](#zqx-up) | Connect to a coordinator and join the fabric |
+| [`zqx down`](#zqx-down) | Disconnect from the fabric |
+| [`zqx status`](#zqx-status) | Show the state of this node |
+| [`zqx peers`](#zqx-peers) | List the peers |
+| [`zqx ping`](#zqx-ping) | Ping a peer over the fabric |
+| [`zqx netcheck`](#zqx-netcheck) | Check UDP, STUN, the relay and the NAT mapping |
+| [`zqx ip`](#zqx-ip) | Show the fabric IP of this node |
+| [`zqx tag`](#zqx-tag) | Show, add or remove tags on this node |
+| [`zqx share`](#zqx-share) | Publish a local port as a service on the fabric |
+| [`zqx forward`](#zqx-forward) | Forward a local TCP port to a service on the fabric |
+| [`zqx apps`](#zqx-apps) | List the services on the fabric |
+| [`zqx test-access`](#zqx-test-access) | Test an access request against the local rules |
+| [`zqx dns`](#zqx-dns) | Show fabric DNS, or resolve a name |
+| [`zqx service`](#zqx-service) | Install, start, stop or remove the background service |
+| [`zqx daemon`](#zqx-daemon) | Run the daemon in the foreground |
+
+**Options for all commands:** `-s, --socket <path>` (the daemon's socket), `-h, --help`, `-V, --version`.
+
+**JSON output:** `zqx status`, `zqx peers`, `zqx apps`, `zqx tag` and `zqx test-access` accept `--json`.
+
+**Exit status:** `0` when the command succeeds, `1` when it fails. `zqx ping` exits with `1` when no ping gets a reply.
+
+### `zqx up`
+
+Connect to a coordinator and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
+
+```bash
+zqx up --server console.zqxnet.com --auth-key <key>
+```
+
+| Option | Environment | Meaning |
+| --- | --- | --- |
+| `--server <address>` (alias `--login-server`) | `ZQX_SERVER` | The coordinator. `console.zqxnet.com` is the hosted coordinator. |
+| `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the coordinator. |
+| `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
+| `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
+| `--tags <tags>` | `ZQX_TAGS` | Tags to advertise, separated by commas. The pre-auth key decides the tags that apply. |
+| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. |
+
+### `zqx down`
+
+Disconnect from the fabric. The node keeps its identity. `zqx up` connects it again.
+
 ### `zqx status`
 
-Display the current status of your zqx node and all connected peers.
+Show the state of this node, then the peers that it uses.
 
-**Usage:**
-```bash
-zqx status
+```text
+=== zqx Node Status ===
+Backend State:       Running
+Node ID:             4f2a91c07e5d38b6a1c29e047d5f8b3a6e1c92d40b7a5e18
+Name:                dana-laptop
+Overlay IP:          100.64.0.12
+Coordinator:         203.0.113.10:443
+Transport:           QUIC (UDP)
+Key Exchange:        X25519MLKEM768 (hybrid post-quantum)
+Virtual Adapter:     Active (utun11)
+State Protection:    Sealed (System keychain)
+
+Fabric Peers:
+  * db-1                 -> 100.64.0.20     online, direct
 ```
 
-**Output:**
-```
-NAME                 IP                   STATUS             ID
-----                 --                   ------             --
-mynode               100.64.0.2           online (self)      a1b2c3d4
-node2                100.64.0.3           online             e5f6g7h8
-node3                100.64.0.4           offline            i9j0k1l2
-```
-
-**Fields:**
-- **NAME**: Node name
-- **IP**: Fabric network IP address (from 100.64.0.0/10 range)
-- **STATUS**: Connection status (`online` or `offline`). Your own node shows `online (self)`
-- **ID**: Short node identifier (first 8 characters of full ID)
-
-**JSON Output:**
-```bash
-zqx status --json
-```
-
-Returns structured JSON data with node and peer information.
-
----
+- `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
+- In a large xnet, the peer list shows only the peers in use, and a count of the others.
 
 ### `zqx peers`
 
-List all peers in the fabric network. This is similar to `zqx status` but focuses on peer information.
+List the peers. There is one row for each peer: node ID, name, endpoint, fabric IP, tags, services and status.
 
-**Usage:**
-```bash
-zqx peers
-```
+**The status column:**
+- The coordinator's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no coordinator session for 5m".
+- `ephemeral` marks a short-lived device.
+- In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this device holds details only for the peers that it uses. The other peers show the status "not in use". This device gets their details and status when it connects to them.
 
-**Output:**
-Same format as `zqx status`, showing all peers in the network.
+With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
 
-**JSON Output:**
-```bash
-zqx peers --json
-```
+### `zqx ping`
 
----
-
-### `zqx ping [target]`
-
-Send ICMP-like ping packets to a peer to test connectivity and measure round-trip time (RTT).
-
-**Usage:**
-```bash
-zqx ping <target>
-```
-
-**Arguments:**
-- `<target>`: Peer to ping, specified by:
-  - Node name (e.g., `node2`)
-  - IP address (e.g., `100.64.0.3`)
-  - IPv4 or IPv6 format
-
-**Options:**
-- `-c, --count <number>`: Number of ping packets to send (default: 4)
-
-**Examples:**
-```bash
-# Ping a peer by name
-zqx ping node2
-
-# Ping a peer by IP address
-zqx ping 100.64.0.3
-
-# Send 10 ping packets
-zqx ping node2 --count 10
-
-# Short form
-zqx ping node2 -c 10
-```
-
-**Output:**
-```
-PING node2 (100.64.0.3)
-RTT: 1.234ms
-RTT: 1.189ms
-RTT: 1.201ms
-RTT: 1.198ms
-
---- node2 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss
-Average RTT: 1.206ms
-```
-
-**How it works:**
-- Sends custom ping packets over QUIC tunnels (not ICMP)
-- Each packet includes a sequence number and timestamp
-- The peer responds with a pong packet
-- RTT is calculated from the round-trip time
-- Results show individual RTT values and statistics
-
-**JSON Output:**
-```bash
-zqx ping node2 --json
-```
-
-Returns structured JSON with RTT measurements and packet loss statistics.
-
----
-
-### `zqx speedtest [target]`
-
-Measure network throughput (bandwidth) to a peer over the QUIC tunnel.
-
-**Usage:**
-```bash
-zqx speedtest <target>
-```
-
-**Arguments:**
-- `<target>`: Peer to test, specified by:
-  - Node name (e.g., `node2`)
-  - IP address (e.g., `100.64.0.3`)
-
-**Options:**
-- `-d, --duration <seconds>`: Test duration in seconds (default: 10)
-- `-D, --direction <direction>`: Test direction: `upload`, `download`, or `both` (default: `both`)
-
-**Examples:**
-```bash
-# Test both upload and download for 10 seconds (default)
-zqx speedtest node2
-
-# Test upload only for 5 seconds
-zqx speedtest node2 -d 5 -D upload
-
-# Test download only for 15 seconds
-zqx speedtest node2 --duration 15 --direction download
-
-# Short form
-zqx speedtest node2 -d 3 -D both
-```
-
-**Output:**
-```
-Speed test to node2 (100.64.0.3)
-Duration: 10 seconds
-Upload:   1973.66 Mbps (246.71 MB/s)
-Download: 0.00 Mbps (0.00 MB/s)
-Total:    1973.66 Mbps (246.71 MB/s)
-```
-
-**Fields:**
-- **Upload**: Bandwidth when sending data to the peer (your upload speed)
-- **Download**: Bandwidth when receiving data from the peer (your download speed)
-- **Total**: Combined bandwidth (when testing both directions)
-
-**How it works:**
-- **Upload test**: Opens QUIC streams and sends 1MB data chunks continuously for the specified duration
-- **Download test**: Currently not implemented (returns 0.00 Mbps)
-- Measures actual bytes transferred over the QUIC tunnel
-- Calculates throughput in both Mbps (megabits per second) and MB/s (megabytes per second)
-
-**Note:** The speedtest runs synchronously and may take longer than the specified duration due to network overhead. The HTTP client timeout is set to 10 minutes for speedtest operations.
-
-**JSON Output:**
-```bash
-zqx speedtest node2 --json
-```
-
-Returns structured JSON with speed measurements.
-
----
-
-## Global Options
-
-### `--json`
-
-Output results in JSON format instead of human-readable text.
-
-**Usage:**
-```bash
-zqx status --json
-zqx ping node2 --json
-zqx speedtest node2 --json
-```
-
-Useful for scripting and programmatic access to zqx data.
-
-### `--socket <path>`
-
-Manually specify the path to the `zqxd` control socket. This option is hidden from help output as it's rarely needed.
-
-**Usage:**
-```bash
-zqx status --socket /custom/path/zqxd.sock
-```
-
-**Note:** The socket path is automatically detected in most cases. Only use this option if:
-- The socket is in a non-standard location
-- You're debugging socket connection issues
-- You need to connect to a different `zqxd` instance
-
----
-
-## Exit Codes
-
-- `0`: Success
-- `1`: Error (command failed, peer not found, etc.)
-
----
-
-## Examples
-
-### Basic Usage
+Ping a peer over the fabric. The output shows the round-trip time and the path: direct, or through the relay.
 
 ```bash
-# Check if zqxd is running and see status
-zqx status
-
-# List all peers
-zqx peers
-
-# Ping a peer to test connectivity
-zqx ping node2
-
-# Test network speed
-zqx speedtest node2
+zqx ping <name, fabric IP or node ID>
 ```
 
-### Advanced Usage
+| Option | Meaning |
+| --- | --- |
+| `-c, --count <n>` | The number of pings (default 4) |
+| `--until-direct` | Stop when the connection is direct |
+| `-v, --verbose` | Show the time for each hop through the relay |
+
+```text
+pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 16ms [X25519MLKEM768]
+no reply: no reply from node2 within 2.5 s
+pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 14ms [X25519MLKEM768]
+3 sent, 2 received
+```
+
+- The peer's `zqxd` (or `zqxnet` app) answers each ping. `zqx ping` counts a reply only when that answer arrives. Thus the times and the losses are real.
+- `zqx ping` works to all peers, with or without a virtual adapter. It also works from a device without one.
+- It exits with status `1` when no ping gets a reply. You can use it as a health check: `zqx ping -c 1 db-1 || exit 1`.
+
+**The OS `ping`:**
+- From a device with the virtual adapter, `ping <peer>` reaches all peers.
+- A peer with the adapter replies from its operating system.
+- A peer without it replies from its daemon, if the access rules permit ICMP from you (`proto:icmp` or `proto:any`).
+- A device without the adapter has no route to the fabric. Use `zqx ping` there.
+
+### `zqx netcheck`
+
+Check the network: UDP, TLS over TCP 443, the STUN server and the relay. The report includes the NAT mapping of the peer port, measured from the peer socket.
+
+```text
+  * UDP:               true
+  * TCP 443 (TLS):     true (649ms)
+  * NAT Mapping:       Port-changing (peer port 24310 appears as 51877)
+  * Public Endpoint:   198.51.100.23:51877
+  * STUN Server:       203.0.113.10:443 (210ms)
+```
+
+### `zqx ip`
+
+Show the fabric IP of this node, for example `100.64.0.3`.
+
+### `zqx tag`
+
+Show, add or remove tags on this node.
 
 ```bash
-# Send 20 ping packets
-zqx ping node2 -c 20
-
-# Test upload speed for 30 seconds
-zqx speedtest node2 -d 30 -D upload
-
-# Get JSON output for scripting
-zqx status --json | jq '.peers[] | select(.connected == true)'
-
-# Use custom socket location
-ZQX_SOCKET=/tmp/custom.sock zqx status
+zqx tag                 # list the tags
+zqx tag add tag:dev
+zqx tag rm tag:dev
 ```
 
-### Troubleshooting
+The pre-auth key decides the tags that the coordinator applies. Peers do not see tag changes made on the device until it joins again.
+
+### `zqx share`
+
+Publish a local port as a named service on the fabric.
 
 ```bash
-# Check if zqxd is running
-zqx status
-# If this fails, zqxd may not be running or socket not found
-
-# Test connectivity to a specific peer
-zqx ping node2
-
-# Measure actual throughput
-zqx speedtest node2 -d 5
+zqx share 8080 --name web
 ```
 
----
+| Option | Meaning |
+| --- | --- |
+| `-n, --name <name>` | The service name (default `app-<port>`) |
+| `--host <host>` | The target host (default `127.0.0.1`) |
+| `--proto <tcp\|udp>` | The protocol (default `tcp`) |
+| `--tags <tags>` | Service tags, separated by commas |
 
-## Coordinator Pinning (`zqxd`)
+Peers see a shared service when this device joins again.
 
-Every node has a persistent hybrid identity in its state file: a classical key (Ed25519, or ECDSA P-256) and an ML-DSA-65 key. Its node ID (48 hex characters) is a hash of both public keys, so dialing a node by its ID pins both. Every connection proves both keys: the TLS handshake signs with the classical key, and each side then signs the session with its ML-DSA-65 key. Nodes also pin the coordinator's key:
+### `zqx forward`
+
+Forward a local TCP port to a service on the fabric.
+
+```bash
+zqx forward 28080 web 8080    # 127.0.0.1:28080 goes to port 8080 of "web"
+```
+
+### `zqx apps`
+
+List the services that the peers publish: service, gateway, endpoint, target and protocol.
+
+### `zqx test-access`
+
+Test an access request against the access rules of this node. The command shows the result (`PERMITTED` or `DENIED`) and the reason.
+
+```bash
+zqx test-access --identity alice@corp --target 127.0.0.1 --port 5432
+```
+
+| Option | Meaning |
+| --- | --- |
+| `-i, --identity <identity>` | The caller identity |
+| `-t, --target <host>` | The target host or IP |
+| `-p, --port <port>` | The target port |
+| `--proto <tcp\|udp>` | The protocol (default `tcp`) |
+| `--caller-tags <tags>` | The caller's tags, separated by commas |
+| `--target-tags <tags>` | The target's tags, separated by commas |
+
+### `zqx dns`
+
+| Command | What it does |
+| --- | --- |
+| `zqx dns status` | Show the xnet domain, the resolver and the names that it knows |
+| `zqx dns resolve <name>` | Resolve a name through the daemon (for example `db-1` or `db-1.acme.zqxnode.com`) |
+
+### `zqx service`
+
+Manage the background service. The actions are different on each platform.
+
+| Action | Windows (service `ZQXD`) | Linux (systemd unit `zqxd`) |
+| --- | --- | --- |
+| `install` | Registers and starts the service | Shows how to make the unit. Refer to the [installation guide](installation.md#run-zqxd-as-a-systemd-service). |
+| `start`, `stop`, `status` | Starts, stops or shows the service | Runs `systemctl start`, `stop` or `status` |
+| `uninstall` | Stops and removes the service | Not available |
+
+- On Windows, run `install` and `uninstall` from an elevated PowerShell.
+- On macOS, `zqx service` does not work. Use `launchctl` with `system/com.zqxnet.zqxd`, or the package's `zqx-uninstall`.
+
+### `zqx daemon`
+
+Run the daemon in the foreground (all-in-one distribution). The options are the same as `zqxd`. The most used options are in the table.
+
+| Option | Environment | Meaning |
+| --- | --- | --- |
+| `-s, --server <address>` | `ZQX_SERVER` | The coordinator |
+| `--auth-token <key>` | `ZQX_AUTH_TOKEN` | The pre-auth key |
+| `-l, --listen <address>` | `ZQX_LISTEN` | The UDP address for peer connections. Without it, the daemon selects a random port from 20000 to 32767 and keeps it. |
+| `--state <path\|auto\|mem:>` | `ZQX_STATE` | The state file. `auto` is the system default. `mem:` keeps the state in memory only. |
+| `--tun <true\|false>` | | Use the virtual adapter |
+| `--socks-port <port>` | | The local SOCKS5 proxy (default 1080, `0` disables it) |
+| `--coordinator-key <node ID>` | `ZQX_COORDINATOR_KEY` | Pin the coordinator's key |
+
+## Coordinator pinning
+
+Each node has a persistent hybrid identity in its state file:
+- a classical key (Ed25519, or ECDSA P-256);
+- an ML-DSA-65 key.
+
+The node ID (48 hex characters) is a hash of both public keys. Thus a connection to a node by its ID pins both keys. Each connection proves both keys: the TLS handshake signs with the classical key, then each side signs the session with its ML-DSA-65 key.
+
+Nodes also pin the coordinator's key, in one of these ways:
 
 | How | Example |
 | :--- | :--- |
-| Flag or environment | `zqxd --server coord.example.com:443 --coordinator-key <coordinator node ID>` (`ZQX_COORDINATOR_KEY`) |
-| Auth key suffix | `zqxd --auth-key <key>.<coordinator node ID>` |
-| First use | With neither, the first coordinator reached is pinned and saved in the state file. |
+| Option or environment | `zqxd --server coord.example.com:443 --coordinator-key <coordinator node ID>` (`ZQX_COORDINATOR_KEY`) |
+| Pre-auth key suffix | `zqx up --auth-key <key>.<coordinator node ID>` |
+| First use | With neither, the node pins the first coordinator that it reaches, and saves it in the state file. |
 
-A coordinator presenting a different key is refused. The coordinator prints its node ID at startup (`Coordinator node ID: …`).
+The node refuses a coordinator with a different key. The coordinator shows its node ID at startup (`Coordinator node ID: …`).
 
----
+## Sealed state
 
-## Sealed State (`zqxd`)
-
-The state file (node keys, auth token, coordinator pins) is encrypted with a key that only this machine can unseal. It's on by default and needs no setup:
+The state file holds the node keys, the pre-auth key and the coordinator pins. A key that only this machine can unseal encrypts it. This is on by default, with no setup.
 
 | Platform | Sealed with |
 | :--- | :--- |
-| Linux | `systemd-creds`: the TPM 2.0 plus the host credential key when the TPM works (needs the `libtss2` libraries), else the host key alone (`/var/lib/systemd/credential.secret`, root only) |
-| macOS | The System keychain (the root LaunchDaemon) |
-| Windows | A non-exportable key in the TPM (Platform Crypto Provider), else DPAPI with the machine key |
+| Linux | `systemd-creds`: the TPM 2.0 and the host credential key when the TPM works (this needs the `libtss2` libraries), or the host key only (`/var/lib/systemd/credential.secret`, root only) |
+| macOS | The System keychain (the root LaunchDaemon), through Apple's `security` tool. Thus later ZQX builds can read it after an upgrade. |
+| Windows | A non-exportable key in the TPM (Platform Crypto Provider), or DPAPI with the machine key |
 
-The key is unsealed once when `zqxd` starts. A copy of the state file is useless on another machine. `zqx status` shows the protection in use (`State Protection: Sealed (TPM 2.0 and host key (systemd-creds))`). A plain state file from an earlier release is sealed on first start, and the node keeps its identity.
+- `zqxd` unseals the key one time, when it starts.
+- A copy of the state file is not usable on a different machine.
+- `zqx status` shows the protection (for example `State Protection: Sealed (System keychain)`).
+- A plain state file from an earlier release becomes sealed when `zqxd` starts. The node keeps its identity.
 
 `ZQX_STATE_SEAL` sets the behaviour:
 
 | Value | Behaviour |
 | :--- | :--- |
-| `auto` (default) | Seal wherever a TPM or keystore is available; otherwise keep the plain, owner-only file |
-| `require` | Refuse to start without one |
-| `off` | Plain, owner-only file |
+| `auto` (default) | Seal where a TPM or a keystore is available. If not, keep a plain file that only the owner can read. |
+| `require` | Do not start without a TPM or a keystore. |
+| `off` | Keep a plain file that only the owner can read. |
 
-A user-run `zqxd` (not root, SYSTEM or the LaunchDaemon) and containers without `systemd-creds` keep a plain file.
+A `zqxd` that a user runs (not root, SYSTEM or the LaunchDaemon) keeps a plain file. So do containers without `systemd-creds`.
 
-**If the state can't be unsealed** (TPM cleared, keychain reset, disk moved to another machine, OS reinstalled), `zqxd` keeps the file as `<state>.unsealable`, starts with a new identity and says so in `zqx status` (`State Problem:`) and the tray. Join again with `zqx up --auth-key <key>`, or from the tray.
+**If `zqxd` cannot unseal the state:** this can occur after a TPM reset, a keychain reset, a disk moved to a different machine, or a new OS installation.
+1. `zqxd` keeps the file as `<state>.unsealable-<unix time>`. Each time it uses a new name, so it overwrites nothing.
+2. It starts with a new identity.
+3. `zqx status` (`State Problem:`) and the tray tell you.
+4. Join again with `zqx up --auth-key <key>`, or from the tray. The message goes away when the coordinator admits the node.
 
----
+An upgrade keeps the sealed state and the identity of the node. There is one exception: a Mac that upgrades from v0.5.3 or earlier. Only the build that wrote its state key can read it, so the Mac joins again one time, with a new identity.
 
-## See Also
+## Fabric names
 
-- [README.md](../README.md) - Project overview and architecture
-- [zqxd documentation](../README.md#start-the-zqx-daemon-zqxd) - Daemon documentation
+Devices have the name `<device>.<xnet domain>`, for example `dana-laptop.acme-labs.zqxnode.com`. The short name `<device>` also works. Services have the name `<service>.<device>.<xnet domain>`.
 
+**With the virtual adapter:**
+- The operating system sends names in the xnet's domain, and only those names, to the fabric resolver `100.100.100.53`.
+- `zqxd` answers on the adapter itself. Thus it opens no DNS socket, and nothing else on the machine can collide with it.
+- It answers A records and reverse lookups for fabric addresses. For other record types, it answers "no data".
+
+The resolver settings on each platform:
+
+| Platform | Settings |
+| :--- | :--- |
+| macOS | `/etc/resolver/<domain>`, and a supplemental DNS entry (`scutil`) that also makes short names work |
+| Linux | `resolvectl dns`, `domain` and `default-route false` on the adapter (systemd-resolved) |
+| Windows | An NRPT rule for `.<domain>`, and the DNS suffix of the adapter. The machine-wide suffix list does not change. |
+
+- The settings follow the xnet's domain. `zqxd` removes them when the adapter stops.
+- `zqxd` removes settings from earlier releases (`.zqx`, `.internal`, `127.0.0.1:5353`).
+- A few seconds after a change, `zqxd` checks that the OS resolves the device's own name. If it does not, `zqx status` shows `DNS Problem:` with the fix. `zqx dns status` and the menu bar show it too.
+
+**Without the virtual adapter** (`--tun false`, containers, the `zqxnet` SDK), fabric names resolve only in ZQX: through the SOCKS proxy and the SDK.
+
+## Related documents
+
+- [Installation guide](installation.md)

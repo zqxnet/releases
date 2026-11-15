@@ -1,71 +1,74 @@
-<div align="center">
-  <img src="assets/zqx-logo.svg" alt="ZQX Logo" width="360">
-  <br>
-  <br>
-  <p><strong>Zero Trust. Quantum Safe. Universal eXchange.</strong></p>
-</div>
+![ZQX](assets/zqx-logo.svg)
 
-[ZQX](https://zqxnet.com) is a zero-trust fabric overlay network that connects your devices, servers, and cloud workloads securely from anywhere. From v0.3.0, every connection uses pinned mutual TLS 1.3 with the hybrid post-quantum `X25519MLKEM768` key exchange (X25519 + FIPS 203 ML-KEM-768).
+**Zero Trust. Quantum Safe. Universal eXchange.**
 
-This repository hosts **official ZQX binary installers, portable packages, and user documentation**. To manage your network, users, and access control policies, sign in to the ZQX Console at [**console.zqxnet.com**](https://console.zqxnet.com).
+[ZQX](https://zqxnet.com) is a zero-trust fabric network. It connects your devices, servers and cloud workloads securely, from all locations.
 
----
+- Each connection uses pinned mutual TLS 1.3 with the hybrid post-quantum `X25519MLKEM768` key exchange (X25519 and FIPS 203 ML-KEM-768).
+- Devices connect directly when they can, and through a ZQX relay when they cannot.
+- Access rules decide who can reach what. A request that no rule permits is refused.
 
-## Downloads & Installation
+This repository has the official ZQX installers, packages and user guides. To manage your network, users and access rules, sign in to the ZQX console at [console.zqxnet.com](https://console.zqxnet.com).
 
-Pre-built signed installers and packages for Windows, macOS, and Linux are available on the [**Releases Page**](https://github.com/zqxnet/releases/releases/latest):
+The diagram shows how devices connect.
 
-| Platform | Download | Description |
+```mermaid
+flowchart LR
+    A[Your laptop] <-->|"encrypted, direct"| B[Your server]
+    A -.->|"through a relay, if direct fails"| B
+    A -->|"control: keys, peers, rules"| C[ZQX coordinator]
+    B -->|"control"| C
+    C -.- K[ZQX console]
+```
+
+## Downloads
+
+The installers and packages for Windows, macOS and Linux are on the [releases page](https://github.com/zqxnet/releases/releases/latest).
+
+| Platform | Download | Contents |
 | :--- | :--- | :--- |
-| **Windows (Installer)** | [**`zqx-setup-x86_64.exe`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-x86_64.exe) | Standalone Windows Setup Wizard & Silent Enterprise Installer (System Tray, Service, CLI, Wintun) |
-| **Windows on ARM (Installer)** | [**`zqx-setup-arm64.exe`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-arm64.exe) | The same installer for arm64 Windows devices |
-| **Windows (Portable)** | [**`zqx-windows-x86_64.zip`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-windows-x86_64.zip) | Portable zip archive: System Tray App (`zqx-tray.exe`), Windows Service, CLI, & Wintun L3 Driver |
-| **macOS (Installer)** | [**`zqx-macos-arm64.pkg`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.pkg) | Apple Installer Package: installs `ZQX.app`, the `zqxd` LaunchDaemon (virtual adapter) and the CLI in `/usr/local/bin` |
-| **macOS (Disk Image)** | [**`zqx-macos-arm64.dmg`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.dmg) | Drag-and-drop Disk Image for easy installation into `/Applications` |
-| **macOS (App Bundle)** | [**`zqx-macos-arm64-app.zip`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64-app.zip) | Portable SwiftUI Menu Bar application bundle (`ZQX.app`) |
-| **macOS (CLI)** | [**`zqx-macos-arm64.tar.gz`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.tar.gz) | Headless command-line binaries (`zqx`, `zqxd`, `zqx-stir`) |
-| **Linux** | [**`zqx-linux-amd64.tar.gz`**](https://github.com/zqxnet/releases/releases/latest/download/zqx-linux-amd64.tar.gz) | Standalone x86_64 binaries (`zqx`, `zqxd`, `zqx-stir`) |
+| **Windows (installer)** | [`zqx-setup-x86_64.exe`](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-x86_64.exe) | Setup wizard and silent installer: tray app, service, CLI, Wintun |
+| **Windows on ARM (installer)** | [`zqx-setup-arm64.exe`](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-arm64.exe) | The same installer, for ARM64 devices |
+| **Windows (portable)** | [`zqx-windows-x86_64.zip`](https://github.com/zqxnet/releases/releases/latest/download/zqx-windows-x86_64.zip) | Zip archive: tray app (`zqx-tray.exe`), service, CLI, Wintun driver |
+| **macOS (installer)** | [`zqx-macos-arm64.pkg`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.pkg) | Installer package: `ZQX.app`, the `zqxd` LaunchDaemon (virtual adapter) and the CLI in `/usr/local/bin` |
+| **macOS (disk image)** | [`zqx-macos-arm64.dmg`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.dmg) | Disk image: drag `ZQX.app` into `/Applications` |
+| **macOS (app)** | [`zqx-macos-arm64-app.zip`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64-app.zip) | The menu bar app bundle (`ZQX.app`) |
+| **macOS (CLI)** | [`zqx-macos-arm64.tar.gz`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.tar.gz) | Command-line binaries (`zqx`, `zqxd`, `zqx-stir`) |
+| **Linux** | [`zqx-linux-amd64.tar.gz`](https://github.com/zqxnet/releases/releases/latest/download/zqx-linux-amd64.tar.gz) | x86_64 binaries (`zqx`, `zqxd`, `zqx-stir`) |
 
-See the [**Installation & Deployment Guide**](docs/installation.md) and [**CLI Reference**](docs/cli-reference.md) for enterprise rollout and systemd setup.
+For the installation steps, refer to the [installation guide](docs/installation.md). For the commands, refer to the [CLI reference](docs/cli-reference.md).
 
----
+## Quick start
 
-## Quickstart
+### 1. Add a device to your network
 
-### 1. Connect to your ZQX network
+1. In the console, click **Add device**.
+2. Copy the command, and run it on the device. It looks like this:
 
-Connect interactively using your browser:
+   ```bash
+   zqx up --server console.zqxnet.com --auth-key zqx_key_...
+   ```
 
-```bash
-zqx up
-```
+On Windows, you can also copy the command and select **Connect** from the ZQX tray icon.
 
-Or enroll a headless server or CI/CD worker using a pre-authentication key:
-
-```bash
-zqx up --auth-key zqx_key_...
-```
-
-### 2. Check status & peers
+### 2. Check the device and its peers
 
 ```bash
-zqx status
-zqx peers
-zqx ping <peer-name-or-ip>
-zqx netcheck
+zqx status                      # this device
+zqx peers                       # the other devices
+zqx ping <peer name or IP>      # a ping over the network
+zqx netcheck                    # UDP, the relay and the NAT
 ```
 
----
+## Plans and licence
 
-## Plans & Licensing
+ZQX is proprietary software, with free and paid plans. The price is per **user**, with no limit on personal devices.
 
-ZQX software is proprietary and available under free and commercial plans metered primarily by **users**—with unlimited personal devices:
-
-| Plan | Users | Coordination Plane | Key Features |
+| Plan | Users | Coordinator | Main features |
 | :--- | :--- | :--- | :--- |
-| **Personal** | **Free up to 10 users** | ZQX Hosted Cloud (`console.zqxnet.com`) | Fabric DNS, unlimited user devices |
-| **Starter** | Per user / month | ZQX Hosted Cloud | Team SSO, granular ACL policies, Fabric DNS |
-| **Premium** | Per user / month | ZQX Hosted Cloud | SIEM audit log streaming, cross-xnet sharing |
-| **Enterprise** | Per user + **per coordinator** | **Self-Hosted Coordinators** + Hosted Cloud | Sovereign / on-prem / air-gapped coordination servers (14-day built-in evaluation mode), 100G throughput, custom SLA |
+| **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`) | Fabric DNS, no limit on user devices |
+| **Starter** | Per user, per month | ZQX hosted | Team SSO, detailed access rules, Fabric DNS |
+| **Premium** | Per user, per month | ZQX hosted | SIEM audit log streaming, sharing across xnets |
+| **Enterprise** | Per user and **per coordinator** | **Self-hosted coordinators** and ZQX hosted | Sovereign, on-premises and air-gapped coordinators (14-day evaluation mode), 100G throughput, custom SLA |
 
-See [LICENSE](LICENSE) for full End-User License Agreement terms. For Enterprise coordinator licensing, contact [sales@zqxnet.com](mailto:sales@zqxnet.com).
+For the full terms, refer to the [End-User License Agreement](LICENSE). For Enterprise coordinator licences, write to [sales@zqxnet.com](mailto:sales@zqxnet.com).
