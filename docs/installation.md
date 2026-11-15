@@ -2,24 +2,16 @@
 
 This guide tells how to install ZQX on Windows, macOS and Linux.
 
-The diagram shows which download to use.
-
-```mermaid
-flowchart TD
-    Q{Which system?} --> W[Windows]
-    Q --> M[macOS]
-    Q --> L[Linux]
-    W --> W1{Install for all users,<br/>with the service and tray?}
-    W1 -- yes --> W2[zqx-setup-x86_64.exe<br/>or zqx-setup-arm64.exe]
-    W1 -- no --> W3[zqx-windows-x86_64.zip<br/>or zqx-windows-arm64.zip]
-    M --> M1{Full fabric IP routing?}
-    M1 -- yes --> M2[zqx-macos-arm64.pkg]
-    M1 -- "no: app only" --> M3[zqx-macos-arm64.dmg]
-    M1 -- "no: CLI only" --> M4[zqx-macos-arm64.tar.gz]
-    L --> L1[zqx-linux-amd64.tar.gz<br/>and a systemd service]
-```
-
 All files are on the [releases page](https://github.com/zqxnet/releases/releases/latest).
+
+| System | Use | Download |
+| --- | --- | --- |
+| Windows | Install for all users, with the service and the tray (recommended) | `zqx-setup-x86_64.exe` or `zqx-setup-arm64.exe` |
+| Windows | Portable, without the setup wizard | `zqx-windows-x86_64.zip` or `zqx-windows-arm64.zip` |
+| macOS | Full fabric IP routing (recommended) | `zqx-macos-arm64.pkg` |
+| macOS | The app only | `zqx-macos-arm64.dmg` |
+| macOS | The command line only | `zqx-macos-arm64.tar.gz` |
+| Linux | The binaries and a systemd service | `zqx-linux-amd64.tar.gz` |
 
 ## Windows
 

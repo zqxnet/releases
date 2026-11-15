@@ -10,17 +10,6 @@
 
 This repository has the official ZQX installers, packages and user guides. To manage your network, users and access rules, sign in to the ZQX console at [console.zqxnet.com](https://console.zqxnet.com).
 
-The diagram shows how devices connect.
-
-```mermaid
-flowchart LR
-    A[Your laptop] <-->|"encrypted, direct"| B[Your server]
-    A -.->|"through a relay, if direct fails"| B
-    A -->|"control: keys, peers, rules"| C[ZQX coordinator]
-    B -->|"control"| C
-    C -.- K[ZQX console]
-```
-
 ## Downloads
 
 The installers and packages for Windows, macOS and Linux are on the [releases page](https://github.com/zqxnet/releases/releases/latest).

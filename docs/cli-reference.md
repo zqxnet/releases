@@ -2,15 +2,6 @@
 
 `zqx` is the command-line client of a ZQX node. It sends each command to the local `zqxd` daemon. The daemon does the work: it talks to the coordinator and to the peers.
 
-The diagram shows the path of a command.
-
-```mermaid
-flowchart LR
-    U[zqx command] -->|Unix socket or named pipe| D[zqxd daemon]
-    D -->|control session| C[Coordinator]
-    D <-->|fabric connections| P[Peers]
-```
-
 ## Find the daemon
 
 `zqx` finds the daemon in this order:
