@@ -29,7 +29,7 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 
 **Access to the service:**
 - The CLI and the tray talk to the service through the protected named pipe `\\.\pipe\ProtectedPrefix\Administrators\ZQX\zqxd`.
-- All logged-on users can read the status.
+- All signed-in local users can read the status, on the desktop and over SSH.
 - Changes (`zqx up`, `zqx down`, profile changes) need a member of the Administrators group. The command prompt does not have to be elevated.
 - A `zqxd.exe` that you start without elevation cannot make that pipe. Set `ZQX_PIPE` (for example `\\.\pipe\zqxd-dev`) for both `zqxd` and `zqx`.
 
@@ -83,7 +83,9 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 
 **The menu bar icon:** four corner dots and a Q when connected. A Z between the corners means connecting. A dimmed icon means disconnected.
 
-**Access to the daemon:** members of the `admin` group control the daemon with `zqx` and the menu bar app, through `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0660`). Other users cannot connect to it.
+**Access to the daemon:** `zqx` and the menu bar app use `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0666`).
+- All local users can read the status (`zqx status`, `zqx peers`, `zqx ping`, `zqx netcheck`).
+- Members of the `admin` group can change it (`zqx up`, `zqx down`, profiles).
 
 **To check the daemon,** run `sudo launchctl print system/com.zqxnet.zqxd` or `zqx status`.
 
@@ -127,6 +129,12 @@ sudo mv zqx zqxd zqx-stir /usr/local/bin/
 
 ### Run zqxd as a systemd service
 
+Make the operator group. Its members can change the daemon without `sudo`:
+
+```bash
+sudo groupadd --system zqx
+```
+
 Make the file `/etc/systemd/system/zqxd.service`:
 
 ```ini
@@ -137,7 +145,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/zqxd --state auto
+ExecStart=/usr/local/bin/zqxd --state auto --operator-group zqx
 Restart=always
 RestartSec=5
 LimitNOFILE=65536
@@ -153,9 +161,21 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now zqxd
 ```
 
-**Access to the daemon:** the service listens on `/var/run/zqx/zqxd.sock`. Only root can connect to it, so run `zqx` with `sudo`.
+**Access to the daemon:** the service listens on `/var/run/zqx/zqxd.sock` (`root:zqx`, mode `0666`). The table shows who can do what.
 
-To let a group use `zqx` without `sudo`, add `--operator-group <group>` to `ExecStart`. The socket then becomes `root:<group>`, mode `0660`. Members of the group can control the daemon.
+| Who | Can do |
+| --- | --- |
+| All local users | Read: `zqx status`, `zqx peers`, `zqx ip`, `zqx ping`, `zqx netcheck`, `zqx dns status` |
+| Members of the `zqx` group | Read, and change: `zqx up`, `zqx down`, `zqx share`, `zqx forward`, profiles |
+| root (`sudo`) | Everything |
+
+To let a user change the daemon without `sudo`, add the user to the group. The user must then sign in again:
+
+```bash
+sudo usermod -aG zqx <user>
+```
+
+The daemon checks each change against the user that the kernel reports. Read replies hold no keys or secrets.
 
 ## Direct connections
 

@@ -16,6 +16,12 @@
 
 On Windows, `zqx` and the service use a protected named pipe. Refer to the [installation guide](installation.md#windows). Usually you do not need `--socket`.
 
+### Who can use the daemon
+
+- **Read:** all local users can read a service's status with no `sudo`: `status`, `peers`, `ip`, `ping`, `netcheck`, `dns status`.
+- **Change:** `up`, `down`, `share`, `forward` and profile commands need root, or the operator group: `zqx` on Linux, `admin` on macOS, Administrators on Windows.
+- **When a change is refused,** `zqx` tells you the command that an administrator runs to add you to the group.
+
 ## Commands
 
 | Command | What it does |
