@@ -8,8 +8,8 @@ All files are on the [releases page](https://github.com/zqxnet/releases/releases
 | --- | --- | --- |
 | Windows | Install for all users, with the service and the tray (recommended) | `zqx-setup-x86_64.exe` or `zqx-setup-arm64.exe` |
 | Windows | Portable, without the setup wizard | `zqx-windows-x86_64.zip` or `zqx-windows-arm64.zip` |
-| macOS | Full fabric IP routing (recommended) | `zqx-macos-arm64.pkg` |
-| macOS | The app only | `zqx-macos-arm64.dmg` |
+| macOS | Full fabric IP routing (recommended) | `zqx-macos-arm64.dmg` (open `Install ZQX.pkg` in it), or `zqx-macos-arm64.pkg` |
+| macOS | The app only | `zqx-macos-arm64.dmg` (drag `ZQX.app` to `Applications`) |
 | macOS | The command line only | `zqx-macos-arm64.tar.gz` |
 | Linux | The binaries and a systemd service | `zqx-linux-amd64.tar.gz` |
 
@@ -38,9 +38,9 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 2. Run the command in a terminal. Or copy the command, and select **Connect** from the ZQX tray icon. The tray offers to join with the copied command.
 
 **The tray icon:**
-- A green mark: connected.
-- A dimmed mark: connecting.
-- A grey mark: disconnected.
+- Four corner dots and a green Q: connected.
+- A Z between the corners, with a dimmed Q: connecting.
+- A grey Q: disconnected.
 - Each peer in its menu can copy its IP or name, or open its web service.
 
 **To check the service,** run `sc.exe query ZQXD` or `zqx status`. In PowerShell, use `sc.exe`, because `sc` is a different command. If the service is missing or stopped, open PowerShell as administrator and run `zqx service install`. This registers and starts the service.
@@ -65,7 +65,10 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 
 ### Option 1: installer package (recommended)
 
-Download `zqx-macos-arm64.pkg`, and open it. The macOS Installer starts.
+1. Download `zqx-macos-arm64.dmg`, and open it.
+2. Open `Install ZQX.pkg`. The macOS Installer starts.
+
+The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package opens from the disk image, macOS does not ask for access to the Downloads folder.
 
 **What the package does:**
 - It installs `ZQX.app` in `/Applications`.
@@ -78,6 +81,8 @@ Download `zqx-macos-arm64.pkg`, and open it. The macOS Installer starts.
 - It keeps the node identity and state in `/Library/Application Support/ZQX`. Only root can read this directory.
 - It starts the menu bar app.
 
+**The menu bar icon:** four corner dots and a Q when connected. A Z between the corners means connecting. A dimmed icon means disconnected.
+
 **Access to the daemon:** members of the `admin` group control the daemon with `zqx` and the menu bar app, through `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0660`). Other users cannot connect to it.
 
 **To check the daemon,** run `sudo launchctl print system/com.zqxnet.zqxd` or `zqx status`.
@@ -88,12 +93,12 @@ Download `zqx-macos-arm64.pkg`, and open it. The macOS Installer starts.
 sudo installer -pkg zqx-macos-arm64.pkg -target /
 ```
 
-### Option 2: disk image (app only)
+### Option 2: app only, from the disk image
 
 1. Download `zqx-macos-arm64.dmg`, and open it.
 2. Drag `ZQX.app` into the `Applications` folder.
 
-The disk image does not install the LaunchDaemon. The menu bar app then starts `zqxd` as your user. This gives the SOCKS5 proxy and Fabric DNS, but `zqxd` cannot make the virtual adapter. For full fabric IP routing, use the `.pkg`.
+The app alone does not install the LaunchDaemon. The menu bar app then starts `zqxd` as your user. This gives the SOCKS5 proxy and Fabric DNS, but `zqxd` cannot make the virtual adapter. For full fabric IP routing, use the `.pkg`.
 
 ### Option 3: command-line binaries
 
