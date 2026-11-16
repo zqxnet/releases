@@ -58,6 +58,13 @@ zqx up --server console.zqxnet.com --auth-key <key>
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The coordinator removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
 
+**Device approval:** if the xnet needs approval for new devices, the device waits with no access until an Owner or Admin approves it.
+
+- `zqx up` prints "Waiting for an administrator to approve this device in the console", then waits. On approval it prints the fabric address, and exits with status 0. On rejection, or when the wait runs out, it prints why, and exits with status 1.
+- Ctrl-C stops waiting in the terminal. The device keeps waiting, and connects by itself once approved.
+- `zqx status` shows "Waiting for approval", and when the wait ends.
+- A rejected device, or one not approved in time, needs a new key. A key marked pre-approved skips approval.
+
 ### `zqx down`
 
 Disconnect from the fabric. The node keeps its identity. `zqx up` connects it again.
