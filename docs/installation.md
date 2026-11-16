@@ -153,6 +153,10 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now zqxd
 ```
 
+**Access to the daemon:** the service listens on `/var/run/zqx/zqxd.sock`. Only root can connect to it, so run `zqx` with `sudo`.
+
+To let a group use `zqx` without `sudo`, add `--operator-group <group>` to `ExecStart`. The socket then becomes `root:<group>`, mode `0660`. Members of the group can control the daemon.
+
 ## Direct connections
 
 Devices connect directly over UDP when they can. When they cannot, they connect through the ZQX relay. All functions work in both cases.

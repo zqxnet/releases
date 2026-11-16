@@ -8,9 +8,11 @@
 
 1. The `--socket <path>` option.
 2. The `ZQX_SOCKET` environment variable.
-3. `$HOME/.zqx/zqxd.sock`, if it exists.
-4. `/var/run/zqx/zqxd.sock`, if it exists. The macOS package and the Linux service use this path.
-5. `/tmp/zqxd.sock`.
+3. `$HOME/.zqx/zqxd.sock`, if it exists. A daemon that runs as your user listens here.
+4. `/var/run/zqx/zqxd.sock`, if it exists. A daemon that runs as root listens here: the macOS package and the Linux service.
+5. `$HOME/.zqx/zqxd.sock`. When no daemon runs, `zqx` starts one there.
+
+`zqx` never uses a directory that all users can write to, such as `/tmp`.
 
 On Windows, `zqx` and the service use a protected named pipe. Refer to the [installation guide](installation.md#windows). Usually you do not need `--socket`.
 
@@ -25,7 +27,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | [`zqx ping`](#zqx-ping) | Ping a peer over the fabric |
 | [`zqx netcheck`](#zqx-netcheck) | Check UDP, STUN, the relay and the NAT mapping |
 | [`zqx ip`](#zqx-ip) | Show the fabric IP of this node |
-| [`zqx tag`](#zqx-tag) | Show, add or remove tags on this node |
+| [`zqx tag`](#zqx-tag) | Show the tags of this node |
 | [`zqx share`](#zqx-share) | Publish a local port as a service on the fabric |
 | [`zqx forward`](#zqx-forward) | Forward a local TCP port to a service on the fabric |
 | [`zqx apps`](#zqx-apps) | List the services on the fabric |
@@ -50,11 +52,10 @@ zqx up --server console.zqxnet.com --auth-key <key>
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `--server <address>` (alias `--login-server`) | `ZQX_SERVER` | The coordinator. `console.zqxnet.com` is the hosted coordinator. |
+| `--server <address>` | `ZQX_SERVER` | The coordinator. `console.zqxnet.com` is the hosted coordinator. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the coordinator. |
 | `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
-| `--tags <tags>` | `ZQX_TAGS` | Tags to advertise, separated by commas. The pre-auth key decides the tags that apply. |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. |
 
 ### `zqx down`
@@ -144,15 +145,14 @@ Show the fabric IP of this node, for example `100.64.0.3`.
 
 ### `zqx tag`
 
-Show, add or remove tags on this node.
+Show the tags of this node.
 
 ```bash
-zqx tag                 # list the tags
-zqx tag add tag:dev
-zqx tag rm tag:dev
+zqx tag
+zqx tag --json
 ```
 
-The pre-auth key decides the tags that the coordinator applies. Peers do not see tag changes made on the device until it joins again.
+The coordinator assigns the tags: from the pre-auth key that admitted the device, or in the console. A device cannot set its own tags. To change them, edit the device in the console.
 
 ### `zqx share`
 
