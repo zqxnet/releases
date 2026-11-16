@@ -56,11 +56,13 @@ zqx up --server console.zqxnet.com --auth-key <key>
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the coordinator. |
 | `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
-| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. |
+| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The coordinator removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
 
 ### `zqx down`
 
 Disconnect from the fabric. The node keeps its identity. `zqx up` connects it again.
+
+On an ephemeral device, `zqx down` leaves the fabric for good: the coordinator removes the device at once, and joining again needs a new key. A daemon with no saved state (`--state mem:`) also leaves when it stops.
 
 ### `zqx status`
 
