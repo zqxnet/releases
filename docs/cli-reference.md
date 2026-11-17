@@ -1,6 +1,6 @@
 # zqx CLI reference
 
-`zqx` is the command-line client of a ZQX node. It sends each command to the local `zqxd` daemon. The daemon does the work: it talks to the coordinator and to the peers.
+`zqx` is the command-line client of a ZQX node. It sends each command to the local `zqxd` daemon. The daemon does the work: it talks to the controller and to the peers.
 
 ## Find the daemon
 
@@ -26,7 +26,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 | Command | What it does |
 | --- | --- |
-| [`zqx up`](#zqx-up) | Connect to a coordinator and join the fabric |
+| [`zqx up`](#zqx-up) | Connect to a controller and join the fabric |
 | [`zqx down`](#zqx-down) | Disconnect from the fabric |
 | [`zqx status`](#zqx-status) | Show the state of this node |
 | [`zqx peers`](#zqx-peers) | List the peers |
@@ -50,7 +50,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 ### `zqx up`
 
-Connect to a coordinator and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
+Connect to a controller and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
 
 ```bash
 zqx up --server console.zqxnet.com --auth-key <key>
@@ -58,11 +58,11 @@ zqx up --server console.zqxnet.com --auth-key <key>
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `--server <address>` | `ZQX_SERVER` | The coordinator. `console.zqxnet.com` is the hosted coordinator. |
-| `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the coordinator. |
+| `--server <address>` | `ZQX_SERVER` | The controller. `console.zqxnet.com` is the hosted controller. |
+| `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the controller. |
 | `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
-| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The coordinator removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
+| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
 
 **Device approval:** if the xnet needs approval for new devices, the device waits with no access until an Owner or Admin approves it.
 
@@ -75,7 +75,7 @@ zqx up --server console.zqxnet.com --auth-key <key>
 
 Disconnect from the fabric. The node keeps its identity. `zqx up` connects it again.
 
-On an ephemeral device, `zqx down` leaves the fabric for good: the coordinator removes the device at once, and joining again needs a new key. A daemon with no saved state (`--state mem:`) also leaves when it stops.
+On an ephemeral device, `zqx down` leaves the fabric for good: the controller removes the device at once, and joining again needs a new key. A daemon with no saved state (`--state mem:`) also leaves when it stops.
 
 ### `zqx status`
 
@@ -87,7 +87,7 @@ Backend State:       Running
 Node ID:             4f2a91c07e5d38b6a1c29e047d5f8b3a6e1c92d40b7a5e18
 Name:                dana-laptop
 Overlay IP:          100.64.0.12
-Coordinator:         203.0.113.10:443
+Controller:          203.0.113.10:443
 Transport:           QUIC (UDP)
 Key Exchange:        X25519MLKEM768 (hybrid post-quantum)
 Virtual Adapter:     Active (utun11)
@@ -105,7 +105,7 @@ Fabric Peers:
 List the peers. There is one row for each peer: node ID, name, endpoint, fabric IP, tags, services and status.
 
 **The status column:**
-- The coordinator's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no coordinator session for 5m".
+- The controller's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no controller session for 5m".
 - `ephemeral` marks a short-lived device.
 - In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this device holds details only for the peers that it uses. The other peers show the status "not in use". This device gets their details and status when it connects to them.
 
@@ -167,7 +167,7 @@ zqx tag
 zqx tag --json
 ```
 
-The coordinator assigns the tags: from the pre-auth key that admitted the device, or in the console. A device cannot set its own tags. To change them, edit the device in the console.
+The controller assigns the tags: from the pre-auth key that admitted the device, or in the console. A device cannot set its own tags. To change them, edit the device in the console.
 
 ### `zqx share`
 
@@ -241,15 +241,15 @@ Run the daemon in the foreground (all-in-one distribution). The options are the 
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `-s, --server <address>` | `ZQX_SERVER` | The coordinator |
+| `-s, --server <address>` | `ZQX_SERVER` | The controller |
 | `--auth-token <key>` | `ZQX_AUTH_TOKEN` | The pre-auth key |
 | `-l, --listen <address>` | `ZQX_LISTEN` | The UDP address for peer connections. Without it, the daemon selects a random port from 20000 to 32767 and keeps it. |
 | `--state <path\|auto\|mem:>` | `ZQX_STATE` | The state file. `auto` is the system default. `mem:` keeps the state in memory only. |
 | `--tun <true\|false>` | | Use the virtual adapter |
 | `--socks-port <port>` | | The local SOCKS5 proxy (default 1080, `0` disables it) |
-| `--coordinator-key <node ID>` | `ZQX_COORDINATOR_KEY` | Pin the coordinator's key |
+| `--coordinator-key <node ID>` | `ZQX_COORDINATOR_KEY` | Pin the controller's key |
 
-## Coordinator pinning
+## Controller pinning
 
 Each node has a persistent hybrid identity in its state file:
 - a classical key (Ed25519, or ECDSA P-256);
@@ -257,19 +257,19 @@ Each node has a persistent hybrid identity in its state file:
 
 The node ID (48 hex characters) is a hash of both public keys. Thus a connection to a node by its ID pins both keys. Each connection proves both keys: the TLS handshake signs with the classical key, then each side signs the session with its ML-DSA-65 key.
 
-Nodes also pin the coordinator's key, in one of these ways:
+Nodes also pin the controller's key, in one of these ways:
 
 | How | Example |
 | :--- | :--- |
 | Option or environment | `zqxd --server coord.example.com:443 --coordinator-key <coordinator node ID>` (`ZQX_COORDINATOR_KEY`) |
 | Pre-auth key suffix | `zqx up --auth-key <key>.<coordinator node ID>` |
-| First use | With neither, the node pins the first coordinator that it reaches, and saves it in the state file. |
+| First use | With neither, the node pins the first controller that it reaches, and saves it in the state file. |
 
-The node refuses a coordinator with a different key. The coordinator shows its node ID at startup (`Coordinator node ID: …`).
+The node refuses a controller with a different key. The controller shows its node ID at startup (`Coordinator node ID: …`).
 
 ## Sealed state
 
-The state file holds the node keys, the pre-auth key and the coordinator pins. A key that only this machine can unseal encrypts it. This is on by default, with no setup.
+The state file holds the node keys, the pre-auth key and the controller pins. A key that only this machine can unseal encrypts it. This is on by default, with no setup.
 
 | Platform | Sealed with |
 | :--- | :--- |
@@ -296,7 +296,7 @@ A `zqxd` that a user runs (not root, SYSTEM or the LaunchDaemon) keeps a plain f
 1. `zqxd` keeps the file as `<state>.unsealable-<unix time>`. Each time it uses a new name, so it overwrites nothing.
 2. It starts with a new identity.
 3. `zqx status` (`State Problem:`) and the tray tell you.
-4. Join again with `zqx up --auth-key <key>`, or from the tray. The message goes away when the coordinator admits the node.
+4. Join again with `zqx up --auth-key <key>`, or from the tray. The message goes away when the controller admits the node.
 
 An upgrade keeps the sealed state and the identity of the node. There is one exception: a Mac that upgrades from v0.5.3 or earlier. Only the build that wrote its state key can read it, so the Mac joins again one time, with a new identity.
 
