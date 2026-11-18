@@ -88,6 +88,8 @@ Node ID:             4f2a91c07e5d38b6a1c29e047d5f8b3a6e1c92d40b7a5e18
 Name:                dana-laptop
 Overlay IP:          100.64.0.12
 Controller:          203.0.113.10:443
+Controller Key:      9c41e0b27d6f53a8c1b04e92f7a3d65e08b1c4f29a7e3d50 (pinned)
+Recovery Key:        5e8a2c71f04b93d6e1a7c2b80f4d9e36 (pinned)
 Transport:           QUIC (UDP)
 Key Exchange:        X25519MLKEM768 (hybrid post-quantum)
 Virtual Adapter:     Active (utun11)
@@ -97,6 +99,8 @@ Fabric Peers:
   * db-1                 -> 100.64.0.20     online, direct
 ```
 
+- `Controller Key:` is the controller node ID that this node pins. Before the first connection it shows `not pinned yet`. Refer to [Controller pinning](#controller-pinning).
+- `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
 
@@ -265,7 +269,7 @@ Nodes also pin the controller's key, in one of these ways:
 | Pre-auth key suffix | `zqx up --auth-key <key>.<controller node ID>` |
 | First use | With neither, the node pins the first controller that it reaches, and saves it in the state file. |
 
-The node refuses a controller with a different key. The controller shows its node ID at startup (`Controller node ID: …`).
+The node refuses a controller with a different key. The controller shows its node ID at startup (`Controller node ID: …`). `zqx status` shows the key that the node pins (`Controller Key:`), so you can compare the two.
 
 ## Sealed state
 
