@@ -50,6 +50,11 @@ echo "== Installing to /usr/local/bin"
 for b in zqx zqxd zqx-stir; do
   [ -f "$BIN_DIR/$b" ] && $SUDO install -m 0755 "$BIN_DIR/$b" /usr/local/bin/$b
 done
+NOTICES=$(find pkg -type f -name THIRD-PARTY-NOTICES.txt | head -1)
+if [ -n "$NOTICES" ]; then
+  $SUDO install -d /usr/local/share/doc/zqx
+  $SUDO install -m 0644 "$NOTICES" /usr/local/share/doc/zqx/THIRD-PARTY-NOTICES.txt
+fi
 
 echo "== Operator group zqx"
 getent group zqx >/dev/null || $SUDO groupadd --system zqx

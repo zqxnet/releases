@@ -3,17 +3,20 @@ ZQX PROPRIETARY SOFTWARE LICENSE AGREEMENT (EULA)
 Copyright (c) 2026 ZQX Net (https://zqxnet.com). All rights reserved.
 SaaS Console: https://console.zqxnet.com | Split-DNS: *.zqxnode.com
 
-IMPORTANT: THIS SOFTWARE AND ITS SOURCE CODE ARE CONFIDENTIAL AND PROPRIETARY
-TO ZQX NET. NO PART OF ZQX IS OPEN-SOURCE SOFTWARE OR SUBJECT TO ANY SOURCE
-CONVERSION LICENSE.
+IMPORTANT: THE ZQX COMPONENTS OF THIS SOFTWARE AND THEIR SOURCE CODE ARE
+CONFIDENTIAL AND PROPRIETARY TO ZQX NET. THE ZQX COMPONENTS ARE NOT OPEN-SOURCE
+SOFTWARE AND ARE NOT SUBJECT TO ANY SOURCE CONVERSION LICENSE. THE SOFTWARE ALSO
+INCLUDES THIRD-PARTY OPEN-SOURCE COMPONENTS UNDER THEIR OWN LICENSES (SEE
+SECTION 6).
 
 1. PROPRIETARY OWNERSHIP
    All ZQX software components—including `zqx` (CLI), `zqxd` (node daemon),
    `zqx-tray` and `ZQX.app` (desktop clients), `zqxnet` (SDK), `zqx-core`,
    `zqx-proto`, `zqx-tunnel`, `zqx-ns`, `zqx-stir`, `zqx-wasm`, `zqx-control`
-   (coordination server), `zqx-console`, and `zqx-saas`—and all related source
-   code, object code, protocols, and documentation (collectively, the "Software")
-   are the exclusive proprietary property of ZQX Net and its licensors.
+   (controller), `zqx-console`, and `zqx-saas`—and all related source code,
+   object code, protocols, and documentation (collectively, the "Software"),
+   except the Third-Party Components (Section 6), are the exclusive proprietary
+   property of ZQX Net and its licensors.
 
 2. LICENSE GRANT BY TIER
    Subject to compliance with this Agreement and applicable subscription payment,
@@ -22,26 +25,26 @@ CONVERSION LICENSE.
    solely according to Customer's active plan:
 
    (a) Personal Plan (Free):
-       Free of charge for up to ten (10) users on the ZQX Hosted SaaS coordination
+       Free of charge for up to ten (10) users on the ZQX Hosted SaaS
        platform (`console.zqxnet.com`), with unlimited connected user devices.
-       Does NOT include rights to operate self-hosted coordination servers.
+       Does NOT include rights to operate self-hosted controllers.
 
    (b) Starter Plan (Per User):
-       Billed per active user seat per month on the ZQX Hosted SaaS coordination
+       Billed per active user seat per month on the ZQX Hosted SaaS
        platform. Includes team SSO, granular ACL policies, and Fabric DNS. Does NOT
-       include rights to operate self-hosted coordination servers.
+       include rights to operate self-hosted controllers.
 
    (c) Premium Plan (Per User):
-       Billed per active user seat per month on the ZQX Hosted SaaS coordination
+       Billed per active user seat per month on the ZQX Hosted SaaS
        platform. Adds real-time SIEM audit export and cross-xnet sharing. Does NOT
-       include rights to operate self-hosted coordination servers.
+       include rights to operate self-hosted controllers.
 
-   (d) Enterprise Plan (Per User + Per Self-Hosted Coordinator):
-       Billed per active user seat plus per licensed self-hosted coordinator
-       instance (`max_coordinators`). Grants the right to deploy and operate the
+   (d) Enterprise Plan (Per User + Per Self-Hosted Controller):
+       Billed per active user seat plus per licensed self-hosted controller
+       instance (`max_controllers`). Grants the right to deploy and operate the
        compiled `zqx-control` and `zqx-console` binaries in sovereign, on-premises,
        VPC, or air-gapped environments up to the exact number of licensed
-       coordinators encoded in Customer's cryptographically signed `ZqxLicense`.
+       controllers encoded in Customer's cryptographically signed `ZqxLicense`.
        Unlicensed local `zqx-control` instances may be used solely for internal
        non-production evaluation during the built-in 14-day evaluation period.
 
@@ -52,10 +55,10 @@ CONVERSION LICENSE.
        code or signing keys of the Software, except to the minimum extent
        expressly mandated by non-waivable applicable law.
    (c) Circumvent, tamper with, or bypass any `ZqxLicense` signature checks,
-       user seat limits, coordinator count limits, or evaluation timers.
+       user seat limits, controller count limits, or evaluation timers.
    (d) Host, resell, white-label, or offer the Software as a managed service or
-       competing coordination service to third parties without written Enterprise
-       MSP authorization from ZQX Net.
+       competing fabric controller service to third parties without written
+       Enterprise MSP authorization from ZQX Net.
 
 4. WARRANTIES, SLA & INDEMNIFICATION
    Personal, Starter, and Premium tiers are provided "AS IS" without warranty of
@@ -68,5 +71,14 @@ CONVERSION LICENSE.
    CONSEQUENTIAL, OR EXEMPLARY DAMAGES ARISING OUT OF OR RELATED TO USE OF THE
    SOFTWARE.
 
-For Enterprise licensing, self-hosted coordinator seats, and commercial inquiries:
+6. THIRD-PARTY COMPONENTS
+   The Software includes third-party components that are licensed under their
+   own open-source licenses (the "Third-Party Components"). The file
+   THIRD-PARTY-NOTICES.txt, distributed with the Software, lists them with their
+   licenses. Each Third-Party Component is governed by its own license. Nothing
+   in this Agreement limits the rights that those licenses grant to Customer,
+   and Section 3 does not apply to a Third-Party Component to the extent that
+   its license grants broader rights.
+
+For Enterprise licensing, self-hosted controller seats, and commercial inquiries:
 Website: https://zqxnet.com | Email: sales@zqxnet.com | Legal: legal@zqxnet.com

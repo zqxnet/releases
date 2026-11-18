@@ -20,7 +20,7 @@ All files are on the [releases page](https://github.com/zqxnet/releases/releases
 Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Windows on ARM).
 
 **What the setup does:**
-- It installs the binaries (`zqx.exe`, `zqxd.exe`, `zqx-tray.exe`, `zqx-stir.exe`) and the Wintun adapter driver, with its licence (`WINTUN-LICENSE.txt`), in `C:\Program Files\ZQX`.
+- It installs the binaries (`zqx.exe`, `zqxd.exe`, `zqx-tray.exe`, `zqx-stir.exe`) and the Wintun adapter driver, with its licence (`WINTUN-LICENSE.txt`), in `C:\Program Files\ZQX`. The open-source notices (`THIRD-PARTY-NOTICES.txt`) are in the same folder.
 - It adds `C:\Program Files\ZQX` to the system `PATH`.
 - It registers and starts the Windows service `ZQXD` (`zqxd install-service`). The service restarts if it fails. The setup tells you if the service cannot start.
 - It adds a Windows Firewall rule (group `ZQX`) that lets peers reach `zqxd.exe` over UDP. Thus devices can connect directly, not through the relay. Uninstallation removes the rule.
@@ -225,3 +225,14 @@ Devices connect directly over UDP when they can. When they cannot, they connect 
   - A peer without it (`--tun false`, a container, a `zqxnet` app) replies from its daemon, if the access rules permit ICMP.
 - **Other whole IP packets** need the virtual adapter on both devices.
 - **`zqx ping <peer>`** works from all devices. It exits with status 1 when no reply comes. Thus you can use it as a health check.
+
+## Open-source notices
+
+ZQX includes open-source components. Their licences are in `THIRD-PARTY-NOTICES.txt`. The table shows where each package puts the file.
+
+| Package | Location |
+| --- | --- |
+| Windows setup and portable archive | `C:\Program Files\ZQX\THIRD-PARTY-NOTICES.txt`, or the archive root |
+| macOS `.pkg` and `.dmg` | `/Applications/ZQX.app/Contents/Resources/THIRD-PARTY-NOTICES.txt` |
+| Linux one-line install | `/usr/local/share/doc/zqx/THIRD-PARTY-NOTICES.txt` |
+| `.tar.gz` archives | The archive root |

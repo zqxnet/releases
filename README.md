@@ -56,11 +56,13 @@ zqx netcheck                    # UDP, the relay and the NAT
 
 ZQX is proprietary software, with free and paid plans. The price is per **user**, with no limit on personal devices.
 
-| Plan | Users | Coordinator | Main features |
+| Plan | Users | Controller | Main features |
 | :--- | :--- | :--- | :--- |
 | **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`) | Fabric DNS, no limit on user devices |
 | **Starter** | Per user, per month | ZQX hosted | Team SSO, detailed access rules, Fabric DNS |
 | **Premium** | Per user, per month | ZQX hosted | SIEM audit log streaming, sharing across xnets |
-| **Enterprise** | Per user and **per coordinator** | **Self-hosted coordinators** and ZQX hosted | Sovereign, on-premises and air-gapped coordinators (14-day evaluation mode), 100G throughput, custom SLA |
+| **Enterprise** | Per user and **per controller** | **Self-hosted controllers** and ZQX hosted | Sovereign, on-premises and air-gapped controllers (14-day evaluation mode), 100G throughput, custom SLA |
 
-For the full terms, refer to the [End-User License Agreement](LICENSE). For Enterprise coordinator licences, write to [sales@zqxnet.com](mailto:sales@zqxnet.com).
+For the full terms, refer to the [End-User License Agreement](LICENSE). For Enterprise controller licences, write to [sales@zqxnet.com](mailto:sales@zqxnet.com).
+
+ZQX includes open-source components. Their licences are in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
