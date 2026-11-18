@@ -81,7 +81,21 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 - It keeps the node identity and state in `/Library/Application Support/ZQX`. Only root can read this directory.
 - It starts the menu bar app.
 
-**The menu bar icon:** four corner dots and a Q when connected. A Z between the corners means connecting. A dimmed icon means disconnected.
+**The menu bar icon:**
+- Four corner dots and a Q: connected.
+- A badge on the icon: connected, but something needs attention. The menu says what, and the next item fixes it.
+- A Z drawn between the corners: connecting, or waiting for an administrator to approve this Mac.
+- A dimmed icon: switched off, or not joined to a fabric.
+- A slash through the icon: the ZQX service (`zqxd`) is not running.
+
+**The menu:**
+- The switch at the top connects and disconnects this Mac.
+- **This Mac** shows the device's fabric address. Click it to copy the address.
+- **Peers** opens a submenu of the other devices: a green dot when a device is online, a ring when it is offline. Each device has its own submenu, with **Open** for a web service, **Copy IP Address** and **Copy Name**.
+- **Join Fabric…** opens a window for a pre-auth key, the controller and the device name. The app sends the key to `zqxd` once, and does not save it.
+- **Restart ZQX Service…** restarts the LaunchDaemon. macOS asks for an administrator's password.
+- **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the device name, the web console) and **Service** (the daemon's status, socket and log).
+- **Quit ZQX** closes the app only. This Mac stays connected, because the service keeps running.
 
 **Access to the daemon:** `zqx` and the menu bar app use `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0666`).
 - All local users can read the status (`zqx status`, `zqx peers`, `zqx ping`, `zqx netcheck`).
