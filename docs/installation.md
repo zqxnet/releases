@@ -120,6 +120,25 @@ sudo zqx-uninstall --purge   # also removes the identity, the state and the logs
 
 ## Linux
 
+### Option 1: one-line install (recommended)
+
+Run this on the machine, as root or as a user with `sudo` (x86-64):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | bash
+```
+
+The script:
+- downloads the latest release and checks it against the release's SHA-256 digest;
+- installs `zqx`, `zqxd` and `zqx-stir` to `/usr/local/bin`;
+- makes the `zqx` operator group and adds you to it;
+- installs and starts the `zqxd` systemd service (below);
+- asks for an auth key from the console (**Add device**), and joins the xnet. The key is not shown, and it is not written to disk or to the shell history.
+
+On a device that has already joined, press Enter at the key prompt: the script upgrades the binaries and keeps the device's identity.
+
+### Option 2: by hand
+
 Download `zqx-linux-amd64.tar.gz`. Extract it, and move the binaries:
 
 ```bash
