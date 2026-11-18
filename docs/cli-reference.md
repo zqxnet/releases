@@ -59,7 +59,7 @@ zqx up --server console.zqxnet.com --auth-key <key>
 | Option | Environment | Meaning |
 | --- | --- | --- |
 | `--server <address>` | `ZQX_SERVER` | The controller. `console.zqxnet.com` is the hosted controller. |
-| `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<coordinator node ID>` also pins the controller. |
+| `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
 | `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
@@ -247,7 +247,7 @@ Run the daemon in the foreground (all-in-one distribution). The options are the 
 | `--state <path\|auto\|mem:>` | `ZQX_STATE` | The state file. `auto` is the system default. `mem:` keeps the state in memory only. |
 | `--tun <true\|false>` | | Use the virtual adapter |
 | `--socks-port <port>` | | The local SOCKS5 proxy (default 1080, `0` disables it) |
-| `--coordinator-key <node ID>` | `ZQX_COORDINATOR_KEY` | Pin the controller's key |
+| `--controller-key <node ID>` | `ZQX_CONTROLLER_KEY` | Pin the controller's key |
 
 ## Controller pinning
 
@@ -255,17 +255,17 @@ Each node has a persistent hybrid identity in its state file:
 - a classical key (Ed25519, or ECDSA P-256);
 - an ML-DSA-65 key.
 
-The node ID (48 hex characters) is a hash of both public keys. Thus a connection to a node by its ID pins both keys. Each connection proves both keys: the TLS handshake signs with the classical key, then each side signs the session with its ML-DSA-65 key.
+The node ID (48 hex characters) is a hash of both public keys. Thus a connection to a node by its ID pins both keys. Each connection proves both keys: the TLS handshake signs with the classical key. Then each side sends an Exported Authenticator (RFC 9261) with its ML-DSA-65 certificate, signed with that key and bound to the session.
 
 Nodes also pin the controller's key, in one of these ways:
 
 | How | Example |
 | :--- | :--- |
-| Option or environment | `zqxd --server coord.example.com:443 --coordinator-key <coordinator node ID>` (`ZQX_COORDINATOR_KEY`) |
-| Pre-auth key suffix | `zqx up --auth-key <key>.<coordinator node ID>` |
+| Option or environment | `zqxd --server controller.example.com:443 --controller-key <controller node ID>` (`ZQX_CONTROLLER_KEY`) |
+| Pre-auth key suffix | `zqx up --auth-key <key>.<controller node ID>` |
 | First use | With neither, the node pins the first controller that it reaches, and saves it in the state file. |
 
-The node refuses a controller with a different key. The controller shows its node ID at startup (`Coordinator node ID: …`).
+The node refuses a controller with a different key. The controller shows its node ID at startup (`Controller node ID: …`).
 
 ## Sealed state
 
