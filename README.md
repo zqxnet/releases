@@ -1,4 +1,7 @@
-![ZQX](assets/zqx-logo.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/zqx-logo.svg">
+  <img alt="ZQX" src="assets/zqx-logo-light.svg" height="44">
+</picture>
 
 **Zero Trust. Quantum Safe. Universal eXchange.**
 
