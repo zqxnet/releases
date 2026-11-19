@@ -97,6 +97,8 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 - **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the device name, the web console) and **Service** (the daemon's status, socket and log).
 - **Quit ZQX** closes the app only. This Mac stays connected, because the service keeps running.
 
+**No menu bar icon:** macOS hides icons that do not fit in the menu bar, for example beside the notch. Open ZQX.app again from Finder, Spotlight or Launchpad. This opens Settings.
+
 **Access to the daemon:** `zqx` and the menu bar app use `/var/run/zqx/zqxd.sock` (`root:admin`, mode `0666`).
 - All local users can read the status (`zqx status`, `zqx peers`, `zqx ping`, `zqx netcheck`).
 - Members of the `admin` group can change it (`zqx up`, `zqx down`, profiles).

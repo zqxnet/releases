@@ -103,6 +103,7 @@ Fabric Peers:
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
+- `Controller Session: none; reconnecting` shows when this node has lost its controller session and is trying again. The peer list then shows the last known presence.
 
 ### `zqx peers`
 
@@ -112,7 +113,8 @@ List the peers. There is one row for each peer: node ID, name, endpoint, fabric 
 - The controller's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no controller session for 5m".
 - "online, idle": the peer is online, and this device has no connection to it now. A connection starts when something uses the peer, and usually goes direct in under a second.
 - "direct (LAN)": the direct path uses the peer's local network address. Two devices on one network find it even when their router cannot send traffic back into its own network. Each device tells its LAN addresses only to the peer, inside the encrypted connection: the controller never sees them. `ZQX_LAN_CANDIDATES=off` stops a device from sending them.
-- "direct, not answering": the direct path has not answered for more than 3 s. After 7 s the connection moves back to the relay, or closes if the peer has gone.
+- "direct, not answering": the direct path has not answered its probes for more than 3 s. After 7 s the connection moves back to the relay, or closes if the peer has gone. A direct path that is not probed shows as "direct".
+- "last known online; reconnecting to the controller": this device has no controller session now. The presence is from the last update, and can be out of date. A peer that this device is connected to shows "connected (direct)" or "connected (relay)", which is current.
 - `ephemeral` marks a short-lived device.
 - In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this device holds details only for the peers that it uses. The other peers show the status "not in use". This device gets their details and status when it connects to them.
 
