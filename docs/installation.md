@@ -238,3 +238,8 @@ ZQX includes open-source components. Their licences are in `THIRD-PARTY-NOTICES.
 | macOS `.pkg` and `.dmg` | `/Applications/ZQX.app/Contents/Resources/THIRD-PARTY-NOTICES.txt` |
 | Linux one-line install | `/usr/local/share/doc/zqx/THIRD-PARTY-NOTICES.txt` |
 | `.tar.gz` archives | The archive root |
+
+The apps also open it:
+- **Windows:** the tray menu, **Open-source notices**.
+- **macOS:** the menu bar menu, **About ZQX**, then **Open-Source Notices**.
+- **The web console:** the **Open-source notices** link, at `/third-party-notices.txt`.

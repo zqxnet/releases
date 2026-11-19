@@ -103,7 +103,7 @@ Fabric Peers:
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
-- `Controller Session: none; reconnecting` shows when this node has lost its controller session and is trying again. The peer list then shows the last known presence.
+- `Controller Session: none for 3h 10m; reconnecting` shows when this node has lost its controller session and is trying again. The time says how old the peer presence is: the peer list shows the presence from when the session ended.
 
 ### `zqx peers`
 
