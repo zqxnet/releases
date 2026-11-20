@@ -90,6 +90,8 @@ Overlay IP:          100.64.0.12
 Controller:          203.0.113.10:443
 Controller Key:      9c41e0b27d6f53a8c1b04e92f7a3d65e08b1c4f29a7e3d50 (pinned)
 Recovery Key:        5e8a2c71f04b93d6e1a7c2b80f4d9e36 (pinned)
+Controller Set:      epoch 1, serial 1
+                     Primary 9c41e0b27d6f53a8c1b04e92f7a3d65e08b1c4f29a7e3d50 at 203.0.113.10:443
 Transport:           QUIC (UDP)
 Key Exchange:        X25519MLKEM768 (hybrid post-quantum)
 Virtual Adapter:     Active (utun11)
@@ -101,6 +103,7 @@ Fabric Peers:
 
 - `Controller Key:` is the controller node ID that this node pins. Before the first connection it shows `not pinned yet`. Refer to [Controller pinning](#controller-pinning).
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
+- `Controller Set:` shows the controllers of this node's xnet, when the controller sends a set: its epoch and serial, and each controller with its role and address. Refer to [Controller sets](#controller-sets).
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
 - `Controller Session: none for 3h 10m; reconnecting` shows when this node has lost its controller session and is trying again. The time says how old the peer presence is: the peer list shows the presence from when the session ended.
@@ -275,6 +278,16 @@ Nodes also pin the controller's key, in one of these ways:
 | First use | With neither, the node pins the first controller that it reaches, and saves it in the state file. |
 
 The node refuses a controller with a different key. The controller shows its node ID at startup (`Controller node ID: …`). `zqx status` shows the key that the node pins (`Controller Key:`), so you can compare the two.
+
+### Controller sets
+
+An xnet can have a primary controller and a secondary controller. The controller sends the node a signed controller set, and the node keeps it in its state file. You do not have to do anything.
+
+- The first set must come from the pinned controller, as primary.
+- A later set must follow the set that the node holds. The primary of the set signs it. A new primary is signed by a controller of the set that the node holds.
+- The node trusts each controller in the set, and refuses all others.
+- The node connects to the primary first, then to the secondary, then to the address that it joined with.
+- The node refuses a set that is older than a set it saw before.
 
 ## Sealed state
 
