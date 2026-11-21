@@ -283,7 +283,7 @@ The node refuses a controller with a different key. The controller shows its nod
 
 An xnet can have a primary controller and a secondary controller. The controller sends the node a signed controller set, and the node keeps it in its state file. You do not have to do anything.
 
-- The first set must come from the pinned controller, as primary.
+- The first set must name the pinned controller (as primary or secondary), and be signed by its primary. A node that joined through the secondary then pins the primary.
 - A later set must follow the set that the node holds. The primary of the set signs it. A new primary is signed by a controller of the set that the node holds.
 - The node trusts each controller in the set, and refuses all others.
 - The node connects to the primary first, then to the secondary, then to the address that it joined with.
