@@ -33,7 +33,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | [`zqx ping`](#zqx-ping) | Ping a peer over the fabric |
 | [`zqx netcheck`](#zqx-netcheck) | Check UDP, STUN, the relay and the NAT mapping |
 | [`zqx ip`](#zqx-ip) | Show the fabric IP of this node |
-| [`zqx tag`](#zqx-tag) | Show the tags of this node |
+| [`zqx labels`](#zqx-labels) | Show the labels of this device |
 | [`zqx share`](#zqx-share) | Publish a local port as a service on the fabric |
 | [`zqx forward`](#zqx-forward) | Forward a local TCP port to a service on the fabric |
 | [`zqx apps`](#zqx-apps) | List the services on the fabric |
@@ -44,7 +44,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 **Options for all commands:** `-s, --socket <path>` (the daemon's socket), `-h, --help`, `-V, --version`.
 
-**JSON output:** `zqx status`, `zqx peers`, `zqx apps`, `zqx tag` and `zqx test-access` accept `--json`.
+**JSON output:** `zqx status`, `zqx peers`, `zqx apps`, `zqx labels` and `zqx test-access` accept `--json`.
 
 **Exit status:** `0` when the command succeeds, `1` when it fails. `zqx ping` exits with `1` when no ping gets a reply.
 
@@ -115,7 +115,7 @@ Fabric Peers:
 
 ### `zqx peers`
 
-List the peers. There is one row for each peer: node ID, name, endpoint, fabric IP, tags, services and status.
+List the peers. There is one row for each peer: node ID, name, endpoint, fabric IP, labels, services and status.
 
 **The status column:**
 - The controller's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no controller session for 5m".
@@ -127,6 +127,22 @@ List the peers. There is one row for each peer: node ID, name, endpoint, fabric 
 - In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this device holds details only for the peers that it uses. The other peers show the status "not in use". This device gets their details and status when it connects to them.
 
 With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
+
+**`-v`, `--verbose`:** for each connected peer, the path probes that find and check the direct path. Use it when a pair stays on the relay.
+
+```text
+             probes sent:     41 direct, last 203.0.113.7:24310 2s ago; 40 through relays
+             pings received:  0
+             answers:         0 direct; 40 through relays
+```
+
+- **probes sent:** pings to the peer's addresses, and through each relay path.
+- **pings received:** pings from the peer that arrived directly. With none, the peer's pings do not reach this device.
+- **answers:** answers to this device's pings. With none, its pings, or the answers, do not get through.
+- **refused** (shown only when not zero): probes under a key that does not match this connection, probes with a clock difference over 30 s, and answers that came too late.
+- `zqx status` shows `Unknown Probes:` when pings arrived under a key that no connection has (for example, a peer that still uses its connection from before a restart).
+- `--json` gives the same counters in `probes`.
+- A relayed pair that hears nothing on the direct path for 2 minutes stops its direct probes for 3 minutes, then looks again. Thus a router entry that went wrong (a peer's restart can do that) expires, and the next probe makes a new one. The daemon's log says when it pauses.
 
 ### `zqx ping`
 
@@ -175,16 +191,32 @@ Check the network: UDP, TLS over TCP 443, the STUN server and the relay. The rep
 
 Show the fabric IP of this node, for example `100.64.0.3`.
 
-### `zqx tag`
+### `zqx labels`
 
-Show the tags of this node.
+Show the labels of this device.
 
 ```bash
-zqx tag
-zqx tag --json
+zqx labels
+zqx labels --json
 ```
 
-The controller assigns the tags: from the pre-auth key that admitted the device, or in the console. A device cannot set its own tags. To change them, edit the device in the console.
+- A label is a fact about a device: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
+- An admin sets the labels: on the key that admitted the device, or on the device in the console. A device cannot set its own labels.
+- Access rules select devices by their labels. Refer to [Labels](#labels).
+
+### Labels
+
+| Part | Characters | Length |
+| --- | --- | --- |
+| Namespace | `a-z`, `0-9`, `-`. Starts with a letter. | 2 to 32 |
+| Key | `a-z`, `0-9`, `-`, `_`, `.`. Starts and ends with a letter or a digit. | 1 to 63 |
+| Value (optional) | The same as a key | 1 to 63 |
+
+- Labels are lower case. A label has 160 characters at most, and a device has 32 labels at most.
+- A device has one value for each key in a namespace: one `ops:env`, not two.
+- Namespaces that start with `zqx` are reserved. `zqx` holds ZQX's services, for example `zqx:relay`. `zqx-<name>` holds the services of a provider that ZQX registers. An admin cannot set a provider's labels.
+- Words of the access rules are not namespaces: `group`, `autogroup`, `node`, `user`, `tag`, `label`, `svc`, `system`, `fabric`, `xnet`, `internet`, `self`, `any`, `all`, `none`, `identity`, `target`, `src`, `dst`, `port` and `proto`.
+- In an access rule, `ops:env` selects every device with the key `ops:env`. `ops:env=prod` selects only the devices with that value.
 
 ### `zqx share`
 
@@ -199,7 +231,7 @@ zqx share 8080 --name web
 | `-n, --name <name>` | The service name (default `app-<port>`) |
 | `--host <host>` | The target host (default `127.0.0.1`) |
 | `--proto <tcp\|udp>` | The protocol (default `tcp`) |
-| `--tags <tags>` | Service tags, separated by commas |
+| `--labels <labels>` | Service labels, separated by commas, in your own namespaces (for example `app:tier=gold`) |
 
 Peers see a shared service when this device joins again.
 
@@ -229,8 +261,10 @@ zqx test-access --identity alice@corp --target 127.0.0.1 --port 5432
 | `-t, --target <host>` | The target host or IP |
 | `-p, --port <port>` | The target port |
 | `--proto <tcp\|udp>` | The protocol (default `tcp`) |
-| `--caller-tags <tags>` | The caller's tags, separated by commas |
-| `--target-tags <tags>` | The target's tags, separated by commas |
+| `--caller-labels <labels>` | The caller's labels, separated by commas |
+| `--target-labels <labels>` | The target's labels, separated by commas |
+
+A label given as the identity or the target (for example `--target ops:role=db`) stands for a device with that label.
 
 ### `zqx dns`
 
