@@ -230,7 +230,7 @@ Devices connect directly over UDP when they can. When they cannot, they connect 
 
 - **`ping` reaches all peers.**
   - A peer with the virtual adapter replies from its operating system.
-  - A peer without it (`--tun false`, a container, a `zqxnet` app) replies from its daemon, if the access rules permit ICMP.
+  - A peer without it (`--tun false`, a container, a `zqxnode` app) replies from its daemon, if the access rules permit ICMP.
 - **Other whole IP packets** need the virtual adapter on both devices.
 - **`zqx ping <peer>`** works from all devices. It exits with status 1 when no reply comes. Thus you can use it as a health check.
 

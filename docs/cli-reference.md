@@ -52,17 +52,22 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 Connect to a controller and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
 
+Copy the command from the console (**Add device**):
+
 ```bash
-zqx up --server console.zqxnet.com --auth-key <key>
+zqx up --auth-key <key>
 ```
+
+The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and connects to them. A self-hosted controller takes its own address: `zqx up --server <controller address> --auth-key <key>`.
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `--server <address>` | `ZQX_SERVER` | The controller. `console.zqxnet.com` is the hosted controller. |
+| `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the device to its xnet's controllers. A self-hosted controller takes its own address. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
 | `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
+| `--accept-dns[=true\|false]` | `ZQX_ACCEPT_DNS` | Use fabric names and the xnet's DNS settings through this machine's DNS. On by default. `--accept-dns=false` leaves the machine's DNS as it is, for example on a server with its own resolver. The daemon keeps this setting. The console shows the devices that turned it off. |
 
 **Device approval:** if the xnet needs approval for new devices, the device waits with no access until an Owner or Admin approves it.
 
@@ -144,7 +149,7 @@ pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 14ms [X25519MLKEM768]
 3 sent, 2 received
 ```
 
-- The peer's `zqxd` (or `zqxnet` app) answers each ping. `zqx ping` counts a reply only when that answer arrives. Thus the times and the losses are real.
+- The peer's `zqxd` (or `zqxnode` app) answers each ping. `zqx ping` counts a reply only when that answer arrives. Thus the times and the losses are real.
 - `zqx ping` works to all peers, with or without a virtual adapter. It also works from a device without one.
 - It exits with status `1` when no ping gets a reply. You can use it as a health check: `zqx ping -c 1 db-1 || exit 1`.
 
@@ -231,8 +236,8 @@ zqx test-access --identity alice@corp --target 127.0.0.1 --port 5432
 
 | Command | What it does |
 | --- | --- |
-| `zqx dns status` | Show the xnet domain, the resolver and the names that it knows |
-| `zqx dns resolve <name>` | Resolve a name through the daemon (for example `db-1` or `db-1.acme.zqxnode.com`) |
+| `zqx dns status` | Show the xnet domain, the resolver, the xnet's DNS settings, this machine's own nameservers, nameservers that do not answer, and the names that it knows |
+| `zqx dns resolve <name>` | Resolve a name through the daemon: a fabric name (for example `db-1` or `db-1.acme.zqxnode.com`), or another name as the xnet's DNS settings say |
 
 ### `zqx service`
 
@@ -327,7 +332,7 @@ An upgrade keeps the sealed state and the identity of the node. There is one exc
 Devices have the name `<device>.<xnet domain>`, for example `dana-laptop.acme-labs.zqxnode.com`. The short name `<device>` also works. Services have the name `<service>.<device>.<xnet domain>`.
 
 **With the virtual adapter:**
-- The operating system sends names in the xnet's domain, and only those names, to the fabric resolver `100.100.100.53`.
+- The operating system sends names in the xnet's domain to the fabric resolver `100.100.100.53`. With DNS settings (below), it also sends the names that the settings claim.
 - `zqxd` answers on the adapter itself. Thus it opens no DNS socket, and nothing else on the machine can collide with it.
 - It answers A records and reverse lookups for fabric addresses. For other record types, it answers "no data".
 
@@ -335,15 +340,37 @@ The resolver settings on each platform:
 
 | Platform | Settings |
 | :--- | :--- |
-| macOS | `/etc/resolver/<domain>`, and a supplemental DNS entry (`scutil`) that also makes short names work |
-| Linux | `resolvectl dns`, `domain` and `default-route false` on the adapter (systemd-resolved) |
-| Windows | An NRPT rule for `.<domain>`, and the DNS suffix of the adapter. The machine-wide suffix list does not change. |
+| macOS | `/etc/resolver/<domain>` for each domain, and a supplemental DNS entry (`scutil`) with the match domains and the search list. "Use for all names" adds the empty match domain. |
+| Linux (systemd-resolved) | `resolvectl dns`, `domain` (search domains, and `~<domain>` for split DNS domains) and `default-route` on the adapter. "Use for all names" adds `~.` and `default-route true`. |
+| Linux (resolvconf) | A `resolvconf` record for the adapter, with `nameserver 100.100.100.53` and the search list |
+| Linux (no DNS manager) | `zqxd` writes `/etc/resolv.conf` one time, and keeps the old file as `/etc/resolv.conf.zqx-backup`. Names that the settings leave to the machine go to the old file's nameservers. `zqx down` puts the old file back. If another program replaces the file, `zqxd` does not write it again: `zqx status` shows the problem and the fix. |
+| Windows | An NRPT rule for `.<domain>` and for each split DNS domain (`.` for "use for all names"), and the DNS suffix of the adapter. With search domains, `zqxd` adds them to the machine-wide suffix list, records them in `C:\ProgramData\ZQX\dns-suffixes.txt`, and removes only those. |
 
 - The settings follow the xnet's domain. `zqxd` removes them when the adapter stops.
 - `zqxd` removes settings from earlier releases (`.zqx`, `.internal`, `127.0.0.1:5353`).
 - A few seconds after a change, `zqxd` checks that the OS resolves the device's own name. If it does not, `zqx status` shows `DNS Problem:` with the fix. `zqx dns status` and the menu bar show it too.
 
-**Without the virtual adapter** (`--tun false`, containers, the `zqxnet` SDK), fabric names resolve only in ZQX: through the SOCKS proxy and the SDK.
+**Without the virtual adapter** (`--tun false`, containers, the `zqxnode` SDK), fabric names resolve only in ZQX: through the SOCKS proxy and the SDK.
+
+## DNS settings of the xnet
+
+An Owner or Admin sets these in the console, on the **Names & DNS** page. With no settings, each device keeps its own DNS for all names outside the xnet.
+
+| Setting | What it does |
+| --- | --- |
+| Nameservers | The xnet's nameservers, in order: an address (plain DNS), a DNS over HTTPS URL, a DNS over TLS server, or a device of the xnet |
+| Use for all names | The nameservers replace each device's own DNS. When no nameserver answers, devices use their own DNS. |
+| Strict | With "use for all names": devices never use their own DNS. Names stop resolving when no nameserver answers. |
+| Split DNS | A domain and its nameservers (for example `corp.example.com` to `10.0.0.53`), or "device's own DNS" to keep a domain on each device's local network |
+| Search domains | Tried after the xnet's domain for names with no dots |
+
+How devices use them:
+- `zqxd` asks the nameservers one at a time, in order. A nameserver that does not answer goes to the end of the list for 30 seconds.
+- A split DNS domain never goes to the device's own DNS, also when its nameservers do not answer. Thus private names stay private.
+- A nameserver on a device of the xnet is reached over the fabric. The access rules must let devices reach it on port 53. The console tells you which devices the rules keep from it.
+- `zqxd` answers only queries from its own machine. It is never a resolver for other devices.
+- Each device reports the nameservers that do not answer. `zqx dns status`, `zqx status` and the console show them.
+- Without the virtual adapter, the SOCKS proxy resolves split DNS names whose address is a device of the xnet.
 
 ## Related documents
 
