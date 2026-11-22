@@ -38,7 +38,7 @@ For the installation steps, refer to the [installation guide](docs/installation.
 2. Copy the command, and run it on the device. It looks like this:
 
    ```bash
-   zqx up --server console.zqxnet.com --auth-key zqx_key_...
+   zqx up --auth-key zqx_key_...
    ```
 
 On Windows, you can also copy the command and select **Connect** from the ZQX tray icon.
