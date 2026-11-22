@@ -64,7 +64,7 @@ The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and
 | --- | --- | --- |
 | `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the device to its xnet's controllers. A self-hosted controller takes its own address. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
-| `--hostname <name>` | `ZQX_NAME` | The node name. The default is the host name. |
+| `--hostname <name>` | `ZQX_NAME` | Fix the device's name. Without it, the name follows the OS hostname, also when the hostname changes (checked each minute; the device then starts a new controller session with the new name). `--hostname auto` lets the name follow the hostname again. A name that an admin gives the device in the console wins over both, until the admin chooses **Use the device's hostname**. Two devices with one name in an xnet: the later one gets `-2`, `-3` and so on. |
 | `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
 | `--accept-dns[=true\|false]` | `ZQX_ACCEPT_DNS` | Use fabric names and the xnet's DNS settings through this machine's DNS. On by default. `--accept-dns=false` leaves the machine's DNS as it is, for example on a server with its own resolver. The daemon keeps this setting. The console shows the devices that turned it off. |
@@ -234,6 +234,8 @@ zqx share 8080 --name web
 | `--labels <labels>` | Service labels, separated by commas, in your own namespaces (for example `app:tier=gold`) |
 
 Peers see a shared service when this device joins again.
+
+**What a service's labels cover:** a rule that names a service's labels permits only streams that reach that service: by its name (`web`, `web.internal`) or by its exact host and port (`127.0.0.1:8080`). `localhost`, `127.0.0.1` and `::1` count as one host. A stream to another port on the same host, or to another host on the same port, is checked with this device's own labels.
 
 ### `zqx forward`
 
