@@ -151,6 +151,12 @@ The script:
 - installs and starts the `zqxd` systemd service (below);
 - asks for an auth key from the console (**Add device**), and joins the xnet. The key is not shown, and it is not written to disk or to the shell history.
 
+A hosted xnet needs only the key: the device finds its controller from the key. For a self-hosted controller, give its address:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | ZQX_SERVER=<address> bash
+```
+
 On a device that has already joined, press Enter at the key prompt: the script upgrades the binaries and keeps the device's identity.
 
 ### Option 2: by hand

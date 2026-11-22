@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
+# Source: zqx-platform `scripts/install.sh`. It is copied to zqxnet/releases
+# (`install.sh`), where the one-line install reads it.
+#
 # Installs the latest ZQX release on a Linux x86-64 machine, runs zqxd as a
 # systemd service, and joins the xnet with an auth key that it asks for.
 #
 # Run on the machine (as root, or as a user with sudo):
 #   curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | bash
+#
+# A hosted xnet needs only the key: the device finds its controller from the
+# key. For a self-hosted controller, give its address:
+#   curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | ZQX_SERVER=<address> bash
 #
 # - The download is checked against the release's SHA-256 digest.
 # - The key is read without echo, passed to `zqx up` in the environment (not
@@ -15,7 +22,7 @@ set -euo pipefail
 
 REPO=zqxnet/releases
 ASSET=zqx-linux-amd64.tar.gz
-DEFAULT_SERVER=console.zqxnet.com
+SERVER=${ZQX_SERVER:-}
 
 [ "$(uname -s)" = Linux ] || { echo "This script is for Linux."; exit 1; }
 [ "$(uname -m)" = x86_64 ] || { echo "Only x86-64 Linux has a release build ($(uname -m) found)."; exit 1; }
@@ -87,16 +94,25 @@ echo "   $(/usr/local/bin/zqxd --version), active"
 echo "== Join your xnet"
 echo "   In the console: Add device. Copy the key from the command"
 echo "   (the part after --auth-key, including any .suffix)."
-read -r -p "   Controller [$DEFAULT_SERVER]: " SERVER < /dev/tty
-SERVER=${SERVER:-$DEFAULT_SERVER}
+[ -z "$SERVER" ] || echo "   Controller: $SERVER"
+SERVER_ARG=${SERVER:+--server $SERVER }
 read -r -s -p "   Auth key (hidden): " KEY < /dev/tty; echo
-[ -n "$KEY" ] || { echo "No key given. Join later with: sudo zqx up --server $SERVER --auth-key <key>"; exit 1; }
+if [ -z "$KEY" ]; then
+  if $SUDO test -s /var/lib/zqx/zqxd.state; then
+    echo "== Done: upgraded. The device keeps its identity and its xnet."
+    exit 0
+  fi
+  echo "No key given. Join later with: sudo zqx up ${SERVER_ARG}--auth-key <key>"
+  exit 1
+fi
 read -r -p "   Device name [$(hostname)]: " NAME < /dev/tty
 NAME=${NAME:-$(hostname)}
 
 # The key reaches `zqx up` on standard input, then in its environment: never
 # on a command line (visible to other users in `ps`).
-JOIN='IFS= read -r ZQX_AUTH_TOKEN; export ZQX_AUTH_TOKEN; exec /usr/local/bin/zqx up --server "$1" --hostname "$2"'
+# With no server, `zqx up` asks fabric.zqxnet.com which controllers hold the
+# key's xnet (it sends only a hash of the key).
+JOIN='IFS= read -r ZQX_AUTH_TOKEN; export ZQX_AUTH_TOKEN; exec /usr/local/bin/zqx up ${1:+--server "$1"} --hostname "$2"'
 if $SUDO bash -c "$JOIN" join "$SERVER" "$NAME" <<< "$KEY"; then
   unset KEY
   echo "== Done"
@@ -104,7 +120,7 @@ if $SUDO bash -c "$JOIN" join "$SERVER" "$NAME" <<< "$KEY"; then
   [ "$TARGET_USER" = root ] || echo "   Sign in again as $TARGET_USER to use zqx up / zqx down without sudo."
 else
   unset KEY
-  echo "Joining failed. The key works once and expires in 24 hours: make a new one in the console and run:"
-  echo "   sudo zqx up --server $SERVER --auth-key <key>"
+  echo "Joining failed. A key can be used up or expired: make a new one in the console and run:"
+  echo "   sudo zqx up ${SERVER_ARG}--auth-key <key>"
   exit 1
 fi
