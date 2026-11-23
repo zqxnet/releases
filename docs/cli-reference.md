@@ -27,8 +27,9 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | Command | What it does |
 | --- | --- |
 | [`zqx up`](#zqx-up) | Connect to a controller and join the fabric |
-| [`zqx login`](#zqx-login) | Sign this device in with your ZQX account, in a browser |
-| [`zqx logout`](#zqx-logout) | Log this device out: it leaves its xnet |
+| [`zqx login`](#zqx-login) | Log this device in with your ZQX account, in a browser |
+| [`zqx logout`](#zqx-logout) | Log out the person on this device: the device stays in its xnet |
+| [`zqx reset`](#zqx-reset) | Leave the xnet: a login or a new key adds the device again, as a new device |
 | [`zqx down`](#zqx-down) | Disconnect from the fabric |
 | [`zqx status`](#zqx-status) | Show the state of this node |
 | [`zqx peers`](#zqx-peers) | List the peers |
@@ -81,7 +82,7 @@ The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and
 
 ### `zqx login`
 
-Sign this device in with your ZQX account, with no key. `zqx up` does the same when the device has no key and has not joined an xnet.
+Log this device in with your ZQX account, with no key. `zqx up` does the same when the device has no key and has not joined an xnet.
 
 ```bash
 zqx login
@@ -95,25 +96,49 @@ zqx login
 - **From another computer** (over SSH, or the printed link opened elsewhere), the page warns you to continue only if you started the login. In an xnet with two or more members, an Owner or an Admin then approves the device in the console.
 - The device opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
 - The link works for 10 minutes. Press Ctrl-C to cancel.
-- A device that has joined already refuses. Run [`zqx logout`](#zqx-logout) first.
+- **A device that joined with a key, with no person:** `zqx login` adds the person. The device keeps its fabric IP and labels, and the login page offers only its xnet.
+- A device with a person refuses. Run [`zqx logout`](#zqx-logout) first.
+
+### Devices with no identity
+
+A device with no label and no person has no identity: nothing says what it is, or who answers for it.
+
+- It loses access after the xnet's identify time: 72 hours by default, from 1 hour to 30 days (**Keys & settings**, **Identify devices**). The limit cannot be turned off.
+- The time starts when the device has neither: when it joins with a key that has no labels, when its last label goes, or when its person logs out or leaves the xnet.
+- After that time, no device can reach it, and it reaches none. It stays in the xnet, with its name and fabric IP.
+- A label, or a person who logs in (`zqx login`), gives the access back at once.
+- `zqx status`, the tray, the menu bar and the console show the time left.
 
 ### `zqx logout`
 
-Log this device out. It leaves its xnet for good, and the next `zqx up` logs in again.
+Log out the person on this device. The device stays in its xnet, with the same fabric IP, name and labels.
 
 ```bash
 zqx logout
 ```
 
-- The controller removes the device from the xnet. The console no longer lists it.
-- The device gets a new identity: when it logs in again, it is a new device, with a new fabric IP.
-- **The controller does not answer** (no network, the controller is down): the device is logged out on itself anyway. It keeps its old key for 30 days, only to finish the logout when the controller answers. Remove the device in the console to finish it at once.
-- The ZQX service starts again with the new identity. This takes a few seconds.
-- `zqx down` is not a logout: a device that goes down keeps its place in the xnet.
+- Access rules that name the person (`src:user:<email>`, `src:autogroup:member`) no longer match the device. Rules on its labels still do.
+- The controller must confirm. If it does not answer, nothing changes: try again when the device is online.
+- To log in again, as the same or another person, run `zqx login`.
 
-**Who can log in and out** (`zqx login`, `zqx logout`, and the apps' **Log in** and **Log out**):
+### `zqx reset`
+
+Leave the xnet for good. A login or a new key adds the device again, as a new device with a new fabric IP.
+
+```bash
+zqx reset
+```
+
+- The command asks first; `--yes` (`-y`) skips the question.
+- The controller removes the device from the xnet. The console no longer lists it.
+- The device gets a new identity.
+- **The controller does not answer** (no network, the controller is down): the device is reset on itself anyway. It keeps its old key for 30 days, only to finish the reset when the controller answers. Remove the device in the console to finish it at once.
+- The ZQX service starts again with the new identity. This takes a few seconds.
+- `zqx down` is not a reset: a device that goes down keeps its place in the xnet.
+
+**Who can log in, log out and reset** (`zqx login`, `zqx logout`, `zqx reset`, and the apps' **Log in**, **Log out** and **Reset**):
 - An administrator, root or the operator group, as for each other change.
-- **On macOS and Windows, also the person at the computer's screen** (the console user; on Windows the active console session, not a Remote Desktop session). That person can log in a device that has not joined, and log out a device that a person logged in. A device that joined with a key logs out by an administrator only.
+- **On macOS and Windows, also the person at the computer's screen** (the console user; on Windows the active console session, not a Remote Desktop session), for a login and a logout. A reset needs an administrator.
 - On Linux, only root and the operator group.
 - To turn the right for the person at the screen off, start the service with `ZQX_SIGN_IN_RIGHT=off`.
 
@@ -151,6 +176,7 @@ Fabric Peers:
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `Controller Set:` shows the controllers of this node's xnet, when the controller sends a set: its epoch and serial, and each controller with its role and address. Refer to [Controller sets](#controller-sets).
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
+- `Identity:` shows on a device with no label and no person: when it loses access, and the fix. After that time it shows `needs identity`: no device can reach it, and it reaches none. A label (from an admin) or [`zqx login`](#zqx-login) gives the access back at once. Refer to [Devices with no identity](#devices-with-no-identity).
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
 - `Controller Session: none for 3h 10m; reconnecting` shows when this node has lost its controller session and is trying again. The time says how old the peer presence is: the peer list shows the presence from when the session ended.
 
@@ -244,7 +270,7 @@ zqx labels --json
 - A label is a fact about a device: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
 - An admin sets the labels: on the key that admitted the device, or on the device in the console. A device cannot set its own labels.
 - Access rules select devices by their labels. Refer to [Labels](#labels).
-- **A device's identity** comes from the controller, never from the device. A device that a person logged in has the person's email (`identity:alice@example.com`). Any other device has `node:<node ID>`. `identity:autogroup:member` matches each device that a person logged in, and no other device.
+- **A device's identity** comes from the controller, never from the device: its node ID, its labels, and the person logged in on it, if any. In access rules, `src:user:alice@example.com` selects Alice's devices, `src:autogroup:member` selects each device with a person, and `src:node:<node ID>` one device. Join selectors with `+`: `src:ops:role=laptop+user:alice@example.com` is Alice on a laptop.
 
 ### Labels
 
@@ -296,19 +322,19 @@ List the services that the peers publish: service, gateway, endpoint, target and
 Test an access request against the access rules of this node. The command shows the result (`PERMITTED` or `DENIED`) and the reason.
 
 ```bash
-zqx test-access --identity alice@corp --target 127.0.0.1 --port 5432
+zqx test-access --caller alice@example.com --target 127.0.0.1 --port 5432
 ```
 
 | Option | Meaning |
 | --- | --- |
-| `-i, --identity <identity>` | The caller identity |
+| `-c, --caller <caller>` | The caller: a person's email, `node:<node ID>`, or a label |
 | `-t, --target <host>` | The target host or IP |
 | `-p, --port <port>` | The target port |
 | `--proto <tcp\|udp>` | The protocol (default `tcp`) |
 | `--caller-labels <labels>` | The caller's labels, separated by commas |
 | `--target-labels <labels>` | The target's labels, separated by commas |
 
-A label given as the identity or the target (for example `--target ops:role=db`) stands for a device with that label.
+A label given as the caller or the target (for example `--target ops:role=db`) stands for a device with that label.
 
 ### `zqx dns`
 

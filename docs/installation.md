@@ -29,14 +29,15 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 
 **Access to the service:**
 - The CLI and the tray talk to the service through the protected named pipe `\\.\pipe\ProtectedPrefix\Administrators\ZQX\zqxd`.
-- All signed-in local users can read the status, on the desktop and over SSH.
+- All local users who are logged in can read the status, on the desktop and over SSH.
 - Changes (`zqx up`, `zqx down`, profile changes) need a member of the Administrators group. The command prompt does not have to be elevated.
 - A `zqxd.exe` that you start without elevation cannot make that pipe. Set `ZQX_PIPE` (for example `\\.\pipe\zqxd-dev`) for both `zqxd` and `zqx`.
 
 **To add the PC to your xnet:**
 - **With your account:** select **Log in…** from the ZQX tray icon. Your browser opens: log in, check the PC, and click **Connect**.
 - **With a key:** in the console, click **Add device**. Run the command in a terminal. Or copy the command, and select **Join with auth key…** from the tray icon. The tray offers to join with the copied command.
-- A user who is not an administrator can log in a PC that has not joined, from the PC's own screen (not over Remote Desktop). **Log out** in the tray menu logs out a PC that a person logged in: it leaves its xnet.
+- A user who is not an administrator can log in a PC that has not joined, from the PC's own screen (not over Remote Desktop). **Log out** in the tray menu logs out the person: the PC stays in its xnet. **Log in…** also shows on a PC that joined with a key and has no person. **Reset…** makes the PC leave its xnet.
+- A PC with no label and no person shows, in the tray menu, when it loses access. After that time it shows **Needs identity**. **Log in…**, or a label from an admin, gives the access back.
 
 **The tray icon:**
 - Four corner dots and a green Q: connected.
@@ -95,7 +96,10 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 - **Peers** opens a submenu of the other devices: a green dot when a device is online, a ring when it is offline. Each device has its own submenu, with **Open** for a web service, **Copy IP Address** and **Copy Name**.
 - **Log In…** (not joined yet) opens your browser: log in, check the Mac, and click **Connect**. A user who is not an administrator can log in this Mac from its own screen.
 - **Join with Auth Key…** opens a window for a pre-auth key, the controller and the device name. The app sends the key to `zqxd` once, and does not save it.
-- **Log Out…** (a Mac that a person logged in) logs the Mac out: it leaves its xnet. After a login from another computer, the menu shows who logged in, with **Log Out…**.
+- **Log Out…** (a Mac that a person logged in) logs out the person: the Mac stays in its xnet, with its fabric IP and labels. After a login from another computer, the menu shows who logged in, with **Log Out…**.
+- **Log In…** also shows on a Mac that joined with a key and has no person: it adds the person.
+- A Mac with no label and no person shows, at the top of the menu, when it loses access. After that time it shows **This Mac needs identity**. **Log In…**, or a label from an admin, gives the access back.
+- **Reset…** makes the Mac leave its xnet. A login or a new key adds it again, as a new device.
 - **Restart ZQX Service…** restarts the LaunchDaemon. macOS asks for an administrator's password.
 - **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the device name, the web console) and **Service** (the daemon's status, socket and log).
 - **Quit ZQX** closes the app only. This Mac stays connected, because the service keeps running.
