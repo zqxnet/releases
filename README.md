@@ -34,7 +34,7 @@ For the installation steps, refer to the [installation guide](docs/installation.
 
 ### 1. Add a device to your network
 
-**With your account:** run `zqx up` on the device. It prints a link and opens your browser. Sign in, check the device, and click **Connect**. On Windows and macOS, you can also select **Sign in…** from the ZQX tray or menu bar icon.
+**With your account:** run `zqx up` on the device. It prints a link (and opens your browser on a desktop). Sign in, check the device, and click **Connect**. On Windows and macOS, you can also select **Sign in…** from the ZQX tray or menu bar icon.
 
 **With a key** (servers, containers, CI):
 
