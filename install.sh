@@ -105,14 +105,14 @@ if [ -z "$KEY" ]; then
   echo "No key given. Join later with: sudo zqx up ${SERVER_ARG}--auth-key <key>"
   exit 1
 fi
-read -r -p "   Device name [$(hostname)]: " NAME < /dev/tty
-NAME=${NAME:-$(hostname)}
+read -r -p "   Device name [$(hostname); it follows the hostname]: " NAME < /dev/tty
 
 # The key reaches `zqx up` on standard input, then in its environment: never
 # on a command line (visible to other users in `ps`).
 # With no server, `zqx up` asks fabric.zqxnet.com which controllers hold the
 # key's xnet (it sends only a hash of the key).
-JOIN='IFS= read -r ZQX_AUTH_TOKEN; export ZQX_AUTH_TOKEN; exec /usr/local/bin/zqx up ${1:+--server "$1"} --hostname "$2"'
+# A name typed here is fixed; with none, the name follows the hostname.
+JOIN='IFS= read -r ZQX_AUTH_TOKEN; export ZQX_AUTH_TOKEN; exec /usr/local/bin/zqx up ${1:+--server "$1"} ${2:+--hostname "$2"}'
 if $SUDO bash -c "$JOIN" join "$SERVER" "$NAME" <<< "$KEY"; then
   unset KEY
   echo "== Done"

@@ -34,6 +34,10 @@ For the installation steps, refer to the [installation guide](docs/installation.
 
 ### 1. Add a device to your network
 
+**With your account:** run `zqx up` on the device. It prints a link and opens your browser. Sign in, check the device, and click **Connect**. On Windows and macOS, you can also select **Sign in…** from the ZQX tray or menu bar icon.
+
+**With a key** (servers, containers, CI):
+
 1. In the console, click **Add device**.
 2. Copy the command, and run it on the device. It looks like this:
 
@@ -41,7 +45,7 @@ For the installation steps, refer to the [installation guide](docs/installation.
    zqx up --auth-key zqx_key_...
    ```
 
-On Windows, you can also copy the command and select **Connect** from the ZQX tray icon.
+On Windows, you can also copy the command and select **Join with auth key…** from the ZQX tray icon.
 
 ### 2. Check the device and its peers
 

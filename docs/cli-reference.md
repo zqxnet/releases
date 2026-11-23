@@ -27,6 +27,8 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | Command | What it does |
 | --- | --- |
 | [`zqx up`](#zqx-up) | Connect to a controller and join the fabric |
+| [`zqx login`](#zqx-login) | Sign this device in with your ZQX account, in a browser |
+| [`zqx logout`](#zqx-logout) | Sign this device out: it leaves its xnet |
 | [`zqx down`](#zqx-down) | Disconnect from the fabric |
 | [`zqx status`](#zqx-status) | Show the state of this node |
 | [`zqx peers`](#zqx-peers) | List the peers |
@@ -52,7 +54,9 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 Connect to a controller and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
 
-Copy the command from the console (**Add device**):
+**With your account:** run `zqx up` with no key. The device prints a link, and opens your browser on a desktop. Sign in, check the device, and click **Connect**. The device then joins the xnet you chose, as you (refer to [`zqx login`](#zqx-login)).
+
+**With a key** (servers, containers, CI): copy the command from the console (**Add device**):
 
 ```bash
 zqx up --auth-key <key>
@@ -65,7 +69,6 @@ The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and
 | `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the device to its xnet's controllers. A self-hosted controller takes its own address. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
 | `--hostname <name>` | `ZQX_NAME` | Fix the device's name. Without it, the name follows the OS hostname, also when the hostname changes (checked each minute; the device then starts a new controller session with the new name). `--hostname auto` lets the name follow the hostname again. A name that an admin gives the device in the console wins over both, until the admin chooses **Use the device's hostname**. Two devices with one name in an xnet: the later one gets `-2`, `-3` and so on. |
-| `--identity <identity>` | `ZQX_IDENTITY` | The identity claim (for example `alice@corp`). |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
 | `--accept-dns[=true\|false]` | `ZQX_ACCEPT_DNS` | Use fabric names and the xnet's DNS settings through this machine's DNS. On by default. `--accept-dns=false` leaves the machine's DNS as it is, for example on a server with its own resolver. The daemon keeps this setting. The console shows the devices that turned it off. |
 
@@ -75,6 +78,44 @@ The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and
 - Ctrl-C stops waiting in the terminal. The device keeps waiting, and connects by itself once approved.
 - `zqx status` shows "Waiting for approval", and when the wait ends.
 - A rejected device, or one not approved in time, needs a new key. A key marked pre-approved skips approval.
+
+### `zqx login`
+
+Sign this device in with your ZQX account, with no key. `zqx up` does the same when the device has no key and has not joined an xnet.
+
+```bash
+zqx login
+```
+
+1. The device prints a link. On a desktop it also opens your browser.
+2. Sign in, check the device's name and address, choose the xnet, and click **Connect**. Click **Not my device** if you did not start this.
+3. The device joins the xnet as you, and prints `Connected to <xnet> as <email>.`
+
+- **On the device itself** (the browser opened by `zqx login`), the browser and the device check each other with no step from you.
+- **From another computer** (over SSH, or the printed link opened elsewhere), the page warns you to continue only if you started the sign-in. In an xnet with two or more members, an Owner or an Admin then approves the device in the console.
+- The device opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
+- The link works for 10 minutes. Press Ctrl-C to cancel.
+- A device that has joined already refuses. Run [`zqx logout`](#zqx-logout) first.
+
+### `zqx logout`
+
+Sign this device out. It leaves its xnet for good, and the next `zqx up` signs in again.
+
+```bash
+zqx logout
+```
+
+- The controller removes the device from the xnet. The console no longer lists it.
+- The device gets a new identity: when it signs in again, it is a new device, with a new fabric IP.
+- **The controller does not answer** (no network, the controller is down): the device is signed out on itself anyway. It keeps its old key for 30 days, only to finish the logout when the controller answers. Remove the device in the console to finish it at once.
+- The ZQX service starts again with the new identity. This takes a few seconds.
+- `zqx down` is not a logout: a device that goes down keeps its place in the xnet.
+
+**Who can sign in and out** (`zqx login`, `zqx logout`, and the apps' **Sign in** and **Sign out**):
+- An administrator, root or the operator group, as for each other change.
+- **On macOS and Windows, also the person at the computer's screen** (the console user; on Windows the active console session, not a Remote Desktop session). That person can sign in a device that has not joined, and sign out a device that a person signed in. A device that joined with a key signs out by an administrator only.
+- On Linux, only root and the operator group.
+- To turn the right for the person at the screen off, start the service with `ZQX_SIGN_IN_RIGHT=off`.
 
 ### `zqx down`
 
@@ -203,6 +244,7 @@ zqx labels --json
 - A label is a fact about a device: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
 - An admin sets the labels: on the key that admitted the device, or on the device in the console. A device cannot set its own labels.
 - Access rules select devices by their labels. Refer to [Labels](#labels).
+- **A device's identity** comes from the controller, never from the device. A device that a person signed in has the person's email (`identity:alice@example.com`). Any other device has `node:<node ID>`. `identity:autogroup:member` matches each device that a person signed in, and no other device.
 
 ### Labels
 

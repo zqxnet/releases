@@ -34,8 +34,9 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 - A `zqxd.exe` that you start without elevation cannot make that pipe. Set `ZQX_PIPE` (for example `\\.\pipe\zqxd-dev`) for both `zqxd` and `zqx`.
 
 **To add the PC to your xnet:**
-1. In the console, click **Add device**.
-2. Run the command in a terminal. Or copy the command, and select **Connect** from the ZQX tray icon. The tray offers to join with the copied command.
+- **With your account:** select **Sign in…** from the ZQX tray icon. Your browser opens: sign in, check the PC, and click **Connect**.
+- **With a key:** in the console, click **Add device**. Run the command in a terminal. Or copy the command, and select **Join with auth key…** from the tray icon. The tray offers to join with the copied command.
+- A user who is not an administrator can sign in a PC that has not joined, from the PC's own screen (not over Remote Desktop). **Sign out** in the tray menu signs out a PC that a person signed in: it leaves its xnet.
 
 **The tray icon:**
 - Four corner dots and a green Q: connected.
@@ -92,7 +93,9 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 - The switch at the top connects and disconnects this Mac.
 - **This Mac** shows the device's fabric address. Click it to copy the address.
 - **Peers** opens a submenu of the other devices: a green dot when a device is online, a ring when it is offline. Each device has its own submenu, with **Open** for a web service, **Copy IP Address** and **Copy Name**.
-- **Join Fabric…** opens a window for a pre-auth key, the controller and the device name. The app sends the key to `zqxd` once, and does not save it.
+- **Sign In…** (not joined yet) opens your browser: sign in, check the Mac, and click **Connect**. A user who is not an administrator can sign in this Mac from its own screen.
+- **Join with Auth Key…** opens a window for a pre-auth key, the controller and the device name. The app sends the key to `zqxd` once, and does not save it.
+- **Sign Out…** (a Mac that a person signed in) signs the Mac out: it leaves its xnet. After a sign-in from another computer, the menu shows who signed in, with **Sign Out…**.
 - **Restart ZQX Service…** restarts the LaunchDaemon. macOS asks for an administrator's password.
 - **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the device name, the web console) and **Service** (the daemon's status, socket and log).
 - **Quit ZQX** closes the app only. This Mac stays connected, because the service keeps running.
