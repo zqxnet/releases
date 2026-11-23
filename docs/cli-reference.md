@@ -28,7 +28,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | --- | --- |
 | [`zqx up`](#zqx-up) | Connect to a controller and join the fabric |
 | [`zqx login`](#zqx-login) | Sign this device in with your ZQX account, in a browser |
-| [`zqx logout`](#zqx-logout) | Sign this device out: it leaves its xnet |
+| [`zqx logout`](#zqx-logout) | Log this device out: it leaves its xnet |
 | [`zqx down`](#zqx-down) | Disconnect from the fabric |
 | [`zqx status`](#zqx-status) | Show the state of this node |
 | [`zqx peers`](#zqx-peers) | List the peers |
@@ -54,7 +54,7 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 Connect to a controller and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
 
-**With your account:** run `zqx up` with no key. The device prints a link, and opens your browser on a desktop. Sign in, check the device, and click **Connect**. The device then joins the xnet you chose, as you (refer to [`zqx login`](#zqx-login)).
+**With your account:** run `zqx up` with no key. The device prints a link, and opens your browser on a desktop. Log in, check the device, and click **Connect**. The device then joins the xnet you chose, as you (refer to [`zqx login`](#zqx-login)).
 
 **With a key** (servers, containers, CI): copy the command from the console (**Add device**):
 
@@ -88,32 +88,32 @@ zqx login
 ```
 
 1. The device prints a link. On a desktop it also opens your browser.
-2. Sign in, check the device's name and address, choose the xnet, and click **Connect**. Click **Not my device** if you did not start this.
+2. Log in, check the device's name and address, choose the xnet, and click **Connect**. Click **Not my device** if you did not start this.
 3. The device joins the xnet as you, and prints `Connected to <xnet> as <email>.`
 
 - **On the device itself** (the browser opened by `zqx login`), the browser and the device check each other with no step from you.
-- **From another computer** (over SSH, or the printed link opened elsewhere), the page warns you to continue only if you started the sign-in. In an xnet with two or more members, an Owner or an Admin then approves the device in the console.
+- **From another computer** (over SSH, or the printed link opened elsewhere), the page warns you to continue only if you started the login. In an xnet with two or more members, an Owner or an Admin then approves the device in the console.
 - The device opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
 - The link works for 10 minutes. Press Ctrl-C to cancel.
 - A device that has joined already refuses. Run [`zqx logout`](#zqx-logout) first.
 
 ### `zqx logout`
 
-Sign this device out. It leaves its xnet for good, and the next `zqx up` signs in again.
+Log this device out. It leaves its xnet for good, and the next `zqx up` logs in again.
 
 ```bash
 zqx logout
 ```
 
 - The controller removes the device from the xnet. The console no longer lists it.
-- The device gets a new identity: when it signs in again, it is a new device, with a new fabric IP.
-- **The controller does not answer** (no network, the controller is down): the device is signed out on itself anyway. It keeps its old key for 30 days, only to finish the logout when the controller answers. Remove the device in the console to finish it at once.
+- The device gets a new identity: when it logs in again, it is a new device, with a new fabric IP.
+- **The controller does not answer** (no network, the controller is down): the device is logged out on itself anyway. It keeps its old key for 30 days, only to finish the logout when the controller answers. Remove the device in the console to finish it at once.
 - The ZQX service starts again with the new identity. This takes a few seconds.
 - `zqx down` is not a logout: a device that goes down keeps its place in the xnet.
 
-**Who can sign in and out** (`zqx login`, `zqx logout`, and the apps' **Sign in** and **Sign out**):
+**Who can log in and out** (`zqx login`, `zqx logout`, and the apps' **Log in** and **Log out**):
 - An administrator, root or the operator group, as for each other change.
-- **On macOS and Windows, also the person at the computer's screen** (the console user; on Windows the active console session, not a Remote Desktop session). That person can sign in a device that has not joined, and sign out a device that a person signed in. A device that joined with a key signs out by an administrator only.
+- **On macOS and Windows, also the person at the computer's screen** (the console user; on Windows the active console session, not a Remote Desktop session). That person can log in a device that has not joined, and log out a device that a person logged in. A device that joined with a key logs out by an administrator only.
 - On Linux, only root and the operator group.
 - To turn the right for the person at the screen off, start the service with `ZQX_SIGN_IN_RIGHT=off`.
 
@@ -244,7 +244,7 @@ zqx labels --json
 - A label is a fact about a device: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
 - An admin sets the labels: on the key that admitted the device, or on the device in the console. A device cannot set its own labels.
 - Access rules select devices by their labels. Refer to [Labels](#labels).
-- **A device's identity** comes from the controller, never from the device. A device that a person signed in has the person's email (`identity:alice@example.com`). Any other device has `node:<node ID>`. `identity:autogroup:member` matches each device that a person signed in, and no other device.
+- **A device's identity** comes from the controller, never from the device. A device that a person logged in has the person's email (`identity:alice@example.com`). Any other device has `node:<node ID>`. `identity:autogroup:member` matches each device that a person logged in, and no other device.
 
 ### Labels
 
