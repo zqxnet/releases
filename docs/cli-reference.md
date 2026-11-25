@@ -27,16 +27,16 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 | Command | What it does |
 | --- | --- |
 | [`zqx up`](#zqx-up) | Connect to a controller and join the fabric |
-| [`zqx login`](#zqx-login) | Log this device in with your ZQX account, in a browser |
-| [`zqx logout`](#zqx-logout) | Log out the person on this device: the device stays in its xnet |
-| [`zqx reset`](#zqx-reset) | Leave the xnet: a login or a new key adds the device again, as a new device |
+| [`zqx login`](#zqx-login) | Log this node in with your ZQX account, in a browser |
+| [`zqx logout`](#zqx-logout) | Log out the person on this node: the node stays in its xnet |
+| [`zqx reset`](#zqx-reset) | Leave the xnet: a login or a new key adds the node again, as a new node |
 | [`zqx down`](#zqx-down) | Disconnect from the fabric |
 | [`zqx status`](#zqx-status) | Show the state of this node |
 | [`zqx peers`](#zqx-peers) | List the peers |
 | [`zqx ping`](#zqx-ping) | Ping a peer over the fabric |
 | [`zqx netcheck`](#zqx-netcheck) | Check UDP, STUN, the relay and the NAT mapping |
 | [`zqx ip`](#zqx-ip) | Show the fabric IP of this node |
-| [`zqx labels`](#zqx-labels) | Show the labels of this device |
+| [`zqx labels`](#zqx-labels) | Show the labels of this node |
 | [`zqx share`](#zqx-share) | Publish a local port as a service on the fabric |
 | [`zqx forward`](#zqx-forward) | Forward a local TCP port to a service on the fabric |
 | [`zqx apps`](#zqx-apps) | List the services on the fabric |
@@ -55,86 +55,86 @@ On Windows, `zqx` and the service use a protected named pipe. Refer to the [inst
 
 Connect to a controller and join the fabric. The daemon keeps the settings. After a restart, it connects again automatically.
 
-**With your account:** run `zqx up` with no key. The device prints a link, and opens your browser on a desktop. Log in, check the device, and click **Connect**. The device then joins the xnet you chose, as you (refer to [`zqx login`](#zqx-login)).
+**With your account:** run `zqx up` with no key. The node prints a link, and opens your browser on a desktop. Log in; on the node itself that is all. The node then joins your xnet, as you (refer to [`zqx login`](#zqx-login)).
 
-**With a key** (servers, containers, CI): copy the command from the console (**Add device**):
+**With a key** (servers, containers, CI): copy the command from the console (**Add node**):
 
 ```bash
 zqx up --auth-key <key>
 ```
 
-The device asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and connects to them. A self-hosted controller takes its own address: `zqx up --server <controller address> --auth-key <key>`.
+The node asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and connects to them. A self-hosted controller takes its own address: `zqx up --server <controller address> --auth-key <key>`.
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the device to its xnet's controllers. A self-hosted controller takes its own address. |
+| `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the node to its xnet's controllers. A self-hosted controller takes its own address. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
-| `--hostname <name>` | `ZQX_NAME` | Fix the device's name. Without it, the name follows the OS hostname, also when the hostname changes (checked each minute; the device then starts a new controller session with the new name). `--hostname auto` lets the name follow the hostname again. A name that an admin gives the device in the console wins over both, until the admin chooses **Use the device's hostname**. Two devices with one name in an xnet: the later one gets `-2`, `-3` and so on. |
-| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the device as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral device when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
-| `--accept-dns[=true\|false]` | `ZQX_ACCEPT_DNS` | Use fabric names and the xnet's DNS settings through this machine's DNS. On by default. `--accept-dns=false` leaves the machine's DNS as it is, for example on a server with its own resolver. The daemon keeps this setting. The console shows the devices that turned it off. |
+| `--hostname <name>` | `ZQX_NAME` | Fix the node's name. Without it, the name follows the OS hostname, also when the hostname changes (checked each minute; the node then starts a new controller session with the new name). `--hostname auto` lets the name follow the hostname again. A name that an admin gives the node in the console wins over both, until the admin chooses **Use the node's hostname**. Two nodes with one name in an xnet: the later one gets `-2`, `-3` and so on. |
+| `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the node as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral node when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
+| `--accept-dns[=true\|false]` | `ZQX_ACCEPT_DNS` | Use fabric names and the xnet's DNS settings through this machine's DNS. On by default. `--accept-dns=false` leaves the machine's DNS as it is, for example on a server with its own resolver. The daemon keeps this setting. The console shows the nodes that turned it off. |
 
-**Device approval:** if the xnet needs approval for new devices, the device waits with no access until an Owner or Admin approves it.
+**Node approval:** if the xnet needs approval for new nodes, the node waits with no access until an Owner or Admin approves it.
 
-- `zqx up` prints "Waiting for an administrator to approve this device in the console", then waits. On approval it prints the fabric address, and exits with status 0. On rejection, or when the wait runs out, it prints why, and exits with status 1.
-- Ctrl-C stops waiting in the terminal. The device keeps waiting, and connects by itself once approved.
+- `zqx up` prints "Waiting for an administrator to approve this node in the console", then waits. On approval it prints the fabric address, and exits with status 0. On rejection, or when the wait runs out, it prints why, and exits with status 1.
+- Ctrl-C stops waiting in the terminal. The node keeps waiting, and connects by itself once approved.
 - `zqx status` shows "Waiting for approval", and when the wait ends.
-- A rejected device, or one not approved in time, needs a new key. A key marked pre-approved skips approval.
+- A rejected node, or one not approved in time, needs a new key. A key marked pre-approved skips approval.
 
 ### `zqx login`
 
-Log this device in with your ZQX account, with no key. `zqx up` does the same when the device has no key and has not joined an xnet.
+Log this node in with your ZQX account, with no key. `zqx up` does the same when the node has no key and has not joined an xnet.
 
 ```bash
 zqx login
 ```
 
-1. The device prints a link. On a desktop it also opens your browser.
-2. Log in, check the device's name and address, choose the xnet, and click **Connect**. Click **Not my device** if you did not start this.
-3. The device joins the xnet as you, and prints `Connected to <xnet> as <email>.`
+1. The node prints a link. On a desktop it also opens your browser.
+2. Log in with your identity provider.
+3. **On the node itself**, that is all: the browser returns to ZQX on the node, as in other desktop apps, and the page says you are logged in. The node prints `Connected to <xnet> as <email>.`
 
-- **On the device itself** (the browser opened by `zqx login`), the browser and the device check each other with no step from you.
-- **From another computer** (over SSH, or the printed link opened elsewhere), the page warns you to continue only if you started the login. In an xnet with two or more members, an Owner or an Admin then approves the device in the console.
-- The device opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
+- **A choice:** a new node asks which xnet to join only when you can add nodes to more than one. It also shows invitations and your company's xnet when you have them.
+- **From another computer** (over SSH, or the printed link opened elsewhere), the browser can't return to the node. The page asks you to check the node and click **Log in** (or **Connect** for a new node), and warns you to continue only if you started the login. Click **Not my node** if you did not start it. In an xnet with two or more members, an Owner or an Admin then approves the node in the console.
+- The node opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
 - The link works for 10 minutes. Press Ctrl-C to cancel.
-- **A device that joined with a key, with no person:** `zqx login` adds the person. The device keeps its fabric IP and labels, and the login page offers only its xnet.
-- A device with a person refuses. Run [`zqx logout`](#zqx-logout) first.
+- **A node that joined with a key, with no person:** `zqx login` adds the person. The node keeps its fabric IP and labels, and logs in to its own xnet only: you must be a member of it.
+- A node with a person refuses. Run [`zqx logout`](#zqx-logout) first.
 
-### Devices with no identity
+### Nodes with no identity
 
-A device with no label and no person has no identity: nothing says what it is, or who answers for it.
+A node with no label and no person has no identity: nothing says what it is, or who answers for it.
 
-- It loses access after the xnet's identify time: 72 hours by default, from 1 hour to 30 days (**Keys & settings**, **Identify devices**). The limit cannot be turned off.
-- The time starts when the device has neither: when it joins with a key that has no labels, when its last label goes, or when its person logs out or leaves the xnet.
-- After that time, no device can reach it, and it reaches none. It stays in the xnet, with its name and fabric IP.
+- It loses access after the xnet's identify time: 72 hours by default, from 1 hour to 30 days (**Keys & settings**, **Identify nodes**). The limit cannot be turned off.
+- The time starts when the node has neither: when it joins with a key that has no labels, when its last label goes, or when its person logs out or leaves the xnet.
+- After that time, no node can reach it, and it reaches none. It stays in the xnet, with its name and fabric IP.
 - A label, or a person who logs in (`zqx login`), gives the access back at once.
 - `zqx status`, the tray, the menu bar and the console show the time left.
 
 ### `zqx logout`
 
-Log out the person on this device. The device stays in its xnet, with the same fabric IP, name and labels.
+Log out the person on this node. The node stays in its xnet, with the same fabric IP, name and labels.
 
 ```bash
 zqx logout
 ```
 
-- Access rules that name the person (`src:user:<email>`, `src:autogroup:member`) no longer match the device. Rules on its labels still do.
-- The controller must confirm. If it does not answer, nothing changes: try again when the device is online.
+- Access rules that name the person (`src:user:<email>`, `src:autogroup:member`) no longer match the node. Rules on its labels still do.
+- The controller must confirm. If it does not answer, nothing changes: try again when the node is online.
 - To log in again, as the same or another person, run `zqx login`.
 
 ### `zqx reset`
 
-Leave the xnet for good. A login or a new key adds the device again, as a new device with a new fabric IP.
+Leave the xnet for good. A login or a new key adds the node again, as a new node with a new fabric IP.
 
 ```bash
 zqx reset
 ```
 
 - The command asks first; `--yes` (`-y`) skips the question.
-- The controller removes the device from the xnet. The console no longer lists it.
-- The device gets a new identity.
-- **The controller does not answer** (no network, the controller is down): the device is reset on itself anyway. It keeps its old key for 30 days, only to finish the reset when the controller answers. Remove the device in the console to finish it at once.
+- The controller removes the node from the xnet. The console no longer lists it.
+- The node gets a new identity.
+- **The controller does not answer** (no network, the controller is down): the node is reset on itself anyway. It keeps its old key for 30 days, only to finish the reset when the controller answers. Remove the node in the console to finish it at once.
 - The ZQX service starts again with the new identity. This takes a few seconds.
-- `zqx down` is not a reset: a device that goes down keeps its place in the xnet.
+- `zqx down` is not a reset: a node that goes down keeps its place in the xnet.
 
 **Who can log in, log out and reset** (`zqx login`, `zqx logout`, `zqx reset`, and the apps' **Log in**, **Log out** and **Reset**):
 - An administrator, root or the operator group, as for each other change.
@@ -146,7 +146,7 @@ zqx reset
 
 Disconnect from the fabric. The node keeps its identity. `zqx up` connects it again.
 
-On an ephemeral device, `zqx down` leaves the fabric for good: the controller removes the device at once, and joining again needs a new key. A daemon with no saved state (`--state mem:`) also leaves when it stops.
+On an ephemeral node, `zqx down` leaves the fabric for good: the controller removes the node at once, and joining again needs a new key. A daemon with no saved state (`--state mem:`) also leaves when it stops.
 
 ### `zqx status`
 
@@ -176,7 +176,8 @@ Fabric Peers:
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `Controller Set:` shows the controllers of this node's xnet, when the controller sends a set: its epoch and serial, and each controller with its role and address. Refer to [Controller sets](#controller-sets).
 - `State Problem:` and `DNS Problem:` lines show a problem and its fix, when there is one.
-- `Identity:` shows on a device with no label and no person: when it loses access, and the fix. After that time it shows `needs identity`: no device can reach it, and it reaches none. A label (from an admin) or [`zqx login`](#zqx-login) gives the access back at once. Refer to [Devices with no identity](#devices-with-no-identity).
+- `Login:` shows `Logged in as <email>` or `Not logged in`. A node is connected, or connected and logged in.
+- `Identity:` shows on a node with no label and no person: when it loses access, and the fix. After that time it shows `needs identity`: no node can reach it, and it reaches none. A label (from an admin) or [`zqx login`](#zqx-login) gives the access back at once. Refer to [Nodes with no identity](#nodes-with-no-identity).
 - In a large xnet, the peer list shows only the peers in use, and a count of the others.
 - `Controller Session: none for 3h 10m; reconnecting` shows when this node has lost its controller session and is trying again. The time says how old the peer presence is: the peer list shows the presence from when the session ended.
 
@@ -185,13 +186,13 @@ Fabric Peers:
 List the peers. There is one row for each peer: node ID, name, endpoint, fabric IP, labels, services and status.
 
 **The status column:**
-- The controller's view, and this device's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no controller session for 5m".
-- "online, idle": the peer is online, and this device has no connection to it now. A connection starts when something uses the peer, and usually goes direct in under a second.
-- "direct (LAN)": the direct path uses the peer's local network address. Two devices on one network find it even when their router cannot send traffic back into its own network. Each device tells its LAN addresses only to the peer, inside the encrypted connection: the controller never sees them. `ZQX_LAN_CANDIDATES=off` stops a device from sending them.
+- The controller's view, and this node's own view of the connection. Examples: "online, direct", "online, relay", "offline, last seen 5m ago", "connected (relay), no controller session for 5m".
+- "online, idle": the peer is online, and this node has no connection to it now. A connection starts when something uses the peer, and usually goes direct in under a second.
+- "direct (LAN)": the direct path uses the peer's local network address. Two nodes on one network find it even when their router cannot send traffic back into its own network. Each node tells its LAN addresses only to the peer, inside the encrypted connection: the controller never sees them. `ZQX_LAN_CANDIDATES=off` stops a node from sending them.
 - "direct, not answering": the direct path has not answered its probes for more than 3 s. After 7 s the connection moves back to the relay, or closes if the peer has gone. A direct path that is not probed shows as "direct".
-- "last known online; reconnecting to the controller": this device has no controller session now. The presence is from the last update, and can be out of date. A peer that this device is connected to shows "connected (direct)" or "connected (relay)", which is current.
-- `ephemeral` marks a short-lived device.
-- In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this device holds details only for the peers that it uses. The other peers show the status "not in use". This device gets their details and status when it connects to them.
+- "last known online; reconnecting to the controller": this node has no controller session now. The presence is from the last update, and can be out of date. A peer that this node is connected to shows "connected (direct)" or "connected (relay)", which is current.
+- `ephemeral` marks a short-lived node.
+- In a large xnet (more peers than `ZQX_ON_DEMAND_PEERS`, default 2,000), this node holds details only for the peers that it uses. The other peers show the status "not in use". This node gets their details and status when it connects to them.
 
 With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
 
@@ -204,8 +205,8 @@ With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
 ```
 
 - **probes sent:** pings to the peer's addresses, and through each relay path.
-- **pings received:** pings from the peer that arrived directly. With none, the peer's pings do not reach this device.
-- **answers:** answers to this device's pings. With none, its pings, or the answers, do not get through.
+- **pings received:** pings from the peer that arrived directly. With none, the peer's pings do not reach this node.
+- **answers:** answers to this node's pings. With none, its pings, or the answers, do not get through.
 - **refused** (shown only when not zero): probes under a key that does not match this connection, probes with a clock difference over 30 s, and answers that came too late.
 - `zqx status` shows `Unknown Probes:` when pings arrived under a key that no connection has (for example, a peer that still uses its connection from before a restart).
 - `--json` gives the same counters in `probes`.
@@ -233,14 +234,14 @@ pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 14ms [X25519MLKEM768]
 ```
 
 - The peer's `zqxd` (or `zqxnode` app) answers each ping. `zqx ping` counts a reply only when that answer arrives. Thus the times and the losses are real.
-- `zqx ping` works to all peers, with or without a virtual adapter. It also works from a device without one.
+- `zqx ping` works to all peers, with or without a virtual adapter. It also works from a node without one.
 - It exits with status `1` when no ping gets a reply. You can use it as a health check: `zqx ping -c 1 db-1 || exit 1`.
 
 **The OS `ping`:**
-- From a device with the virtual adapter, `ping <peer>` reaches all peers.
+- From a node with the virtual adapter, `ping <peer>` reaches all peers.
 - A peer with the adapter replies from its operating system.
 - A peer without it replies from its daemon, if the access rules permit ICMP from you (`proto:icmp` or `proto:any`).
-- A device without the adapter has no route to the fabric. Use `zqx ping` there.
+- A node without the adapter has no route to the fabric. Use `zqx ping` there.
 
 ### `zqx netcheck`
 
@@ -260,17 +261,17 @@ Show the fabric IP of this node, for example `100.64.0.3`.
 
 ### `zqx labels`
 
-Show the labels of this device.
+Show the labels of this node.
 
 ```bash
 zqx labels
 zqx labels --json
 ```
 
-- A label is a fact about a device: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
-- An admin sets the labels: on the key that admitted the device, or on the device in the console. A device cannot set its own labels.
-- Access rules select devices by their labels. Refer to [Labels](#labels).
-- **A device's identity** comes from the controller, never from the device: its node ID, its labels, and the person logged in on it, if any. In access rules, `src:user:alice@example.com` selects Alice's devices, `src:autogroup:member` selects each device with a person, and `src:node:<node ID>` one device. Join selectors with `+`: `src:ops:role=laptop+user:alice@example.com` is Alice on a laptop.
+- A label is a fact about a node: `namespace:key` or `namespace:key=value`. Examples: `ops:env=prod`, `ops:gpu`, `zqx:relay`.
+- An admin sets the labels: on the key that admitted the node, or on the node in the console. A node cannot set its own labels.
+- Access rules select nodes by their labels. Refer to [Labels](#labels).
+- **A node's identity** comes from the controller, never from the node: its node ID, its labels, and the person logged in on it, if any. In access rules, `src:user:alice@example.com` selects Alice's nodes, `src:autogroup:member` selects each node with a person, and `src:node:<node ID>` one node. Join selectors with `+`: `src:ops:role=laptop+user:alice@example.com` is Alice on a laptop. A rule names at most one person and at most one `node:` on each side; `dst:node:<node ID>+ops:env=prod` is that one node, while it has the label.
 
 ### Labels
 
@@ -280,11 +281,11 @@ zqx labels --json
 | Key | `a-z`, `0-9`, `-`, `_`, `.`. Starts and ends with a letter or a digit. | 1 to 63 |
 | Value (optional) | The same as a key | 1 to 63 |
 
-- Labels are lower case. A label has 160 characters at most, and a device has 32 labels at most.
-- A device has one value for each key in a namespace: one `ops:env`, not two.
+- Labels are lower case. A label has 160 characters at most, and a node has 32 labels at most.
+- A node has one value for each key in a namespace: one `ops:env`, not two.
 - Namespaces that start with `zqx` are reserved. `zqx` holds ZQX's services, for example `zqx:relay`. `zqx-<name>` holds the services of a provider that ZQX registers. An admin cannot set a provider's labels.
 - Words of the access rules are not namespaces: `group`, `autogroup`, `node`, `user`, `tag`, `label`, `svc`, `system`, `fabric`, `xnet`, `internet`, `self`, `any`, `all`, `none`, `identity`, `target`, `src`, `dst`, `port` and `proto`.
-- In an access rule, `ops:env` selects every device with the key `ops:env`. `ops:env=prod` selects only the devices with that value.
+- In an access rule, `ops:env` selects every node with the key `ops:env`. `ops:env=prod` selects only the nodes with that value.
 
 ### `zqx share`
 
@@ -301,9 +302,9 @@ zqx share 8080 --name web
 | `--proto <tcp\|udp>` | The protocol (default `tcp`) |
 | `--labels <labels>` | Service labels, separated by commas, in your own namespaces (for example `app:tier=gold`) |
 
-Peers see a shared service when this device joins again.
+Peers see a shared service when this node joins again.
 
-**What a service's labels cover:** a rule that names a service's labels permits only streams that reach that service: by its name (`web`, `web.internal`) or by its exact host and port (`127.0.0.1:8080`). `localhost`, `127.0.0.1` and `::1` count as one host. A stream to another port on the same host, or to another host on the same port, is checked with this device's own labels.
+**What a service's labels cover:** a rule that names a service's labels permits only streams that reach that service: by its name (`web`, `web.internal`) or by its exact host and port (`127.0.0.1:8080`). `localhost`, `127.0.0.1` and `::1` count as one host. A stream to another port on the same host, or to another host on the same port, is checked with this node's own labels.
 
 ### `zqx forward`
 
@@ -334,7 +335,7 @@ zqx test-access --caller alice@example.com --target 127.0.0.1 --port 5432
 | `--caller-labels <labels>` | The caller's labels, separated by commas |
 | `--target-labels <labels>` | The target's labels, separated by commas |
 
-A label given as the caller or the target (for example `--target ops:role=db`) stands for a device with that label.
+A label given as the caller or the target (for example `--target ops:role=db`) stands for a node with that label.
 
 ### `zqx dns`
 
@@ -433,7 +434,7 @@ An upgrade keeps the sealed state and the identity of the node. There is one exc
 
 ## Fabric names
 
-Devices have the name `<device>.<xnet domain>`, for example `dana-laptop.acme-labs.zqxnode.com`. The short name `<device>` also works. Services have the name `<service>.<device>.<xnet domain>`.
+Nodes have the name `<node>.<xnet domain>`, for example `dana-laptop.acme-labs.zqxnode.com`. The short name `<node>` also works. Services have the name `<service>.<node>.<xnet domain>`.
 
 **With the virtual adapter:**
 - The operating system sends names in the xnet's domain to the fabric resolver `100.100.100.53`. With DNS settings (below), it also sends the names that the settings claim.
@@ -452,29 +453,29 @@ The resolver settings on each platform:
 
 - The settings follow the xnet's domain. `zqxd` removes them when the adapter stops.
 - `zqxd` removes settings from earlier releases (`.zqx`, `.internal`, `127.0.0.1:5353`).
-- A few seconds after a change, `zqxd` checks that the OS resolves the device's own name. If it does not, `zqx status` shows `DNS Problem:` with the fix. `zqx dns status` and the menu bar show it too.
+- A few seconds after a change, `zqxd` checks that the OS resolves the node's own name. If it does not, `zqx status` shows `DNS Problem:` with the fix. `zqx dns status` and the menu bar show it too.
 
 **Without the virtual adapter** (`--tun false`, containers, the `zqxnode` SDK), fabric names resolve only in ZQX: through the SOCKS proxy and the SDK.
 
 ## DNS settings of the xnet
 
-An Owner or Admin sets these in the console, on the **Names & DNS** page. With no settings, each device keeps its own DNS for all names outside the xnet.
+An Owner or Admin sets these in the console, on the **Names & DNS** page. With no settings, each node keeps its own DNS for all names outside the xnet.
 
 | Setting | What it does |
 | --- | --- |
-| Nameservers | The xnet's nameservers, in order: an address (plain DNS), a DNS over HTTPS URL, a DNS over TLS server, or a device of the xnet |
-| Use for all names | The nameservers replace each device's own DNS. When no nameserver answers, devices use their own DNS. |
-| Strict | With "use for all names": devices never use their own DNS. Names stop resolving when no nameserver answers. |
-| Split DNS | A domain and its nameservers (for example `corp.example.com` to `10.0.0.53`), or "device's own DNS" to keep a domain on each device's local network |
+| Nameservers | The xnet's nameservers, in order: an address (plain DNS), a DNS over HTTPS URL, a DNS over TLS server, or a node of the xnet |
+| Use for all names | The nameservers replace each node's own DNS. When no nameserver answers, nodes use their own DNS. |
+| Strict | With "use for all names": nodes never use their own DNS. Names stop resolving when no nameserver answers. |
+| Split DNS | A domain and its nameservers (for example `corp.example.com` to `10.0.0.53`), or "node's own DNS" to keep a domain on each node's local network |
 | Search domains | Tried after the xnet's domain for names with no dots |
 
-How devices use them:
+How nodes use them:
 - `zqxd` asks the nameservers one at a time, in order. A nameserver that does not answer goes to the end of the list for 30 seconds.
-- A split DNS domain never goes to the device's own DNS, also when its nameservers do not answer. Thus private names stay private.
-- A nameserver on a device of the xnet is reached over the fabric. The access rules must let devices reach it on port 53. The console tells you which devices the rules keep from it.
-- `zqxd` answers only queries from its own machine. It is never a resolver for other devices.
-- Each device reports the nameservers that do not answer. `zqx dns status`, `zqx status` and the console show them.
-- Without the virtual adapter, the SOCKS proxy resolves split DNS names whose address is a device of the xnet.
+- A split DNS domain never goes to the node's own DNS, also when its nameservers do not answer. Thus private names stay private.
+- A nameserver on a node of the xnet is reached over the fabric. The access rules must let nodes reach it on port 53. The console tells you which nodes the rules keep from it.
+- `zqxd` answers only queries from its own machine. It is never a resolver for other nodes.
+- Each node reports the nameservers that do not answer. `zqx dns status`, `zqx status` and the console show them.
+- Without the virtual adapter, the SOCKS proxy resolves split DNS names whose address is a node of the xnet.
 
 ## Related documents
 

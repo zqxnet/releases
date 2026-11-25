@@ -23,7 +23,7 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 - It installs the binaries (`zqx.exe`, `zqxd.exe`, `zqx-tray.exe`, `zqx-stir.exe`) and the Wintun adapter driver, with its licence (`WINTUN-LICENSE.txt`), in `C:\Program Files\ZQX`. The open-source notices (`THIRD-PARTY-NOTICES.txt`) are in the same folder.
 - It adds `C:\Program Files\ZQX` to the system `PATH`.
 - It registers and starts the Windows service `ZQXD` (`zqxd install-service`). The service restarts if it fails. The setup tells you if the service cannot start.
-- It adds a Windows Firewall rule (group `ZQX`) that lets peers reach `zqxd.exe` over UDP. Thus devices can connect directly, not through the relay. Uninstallation removes the rule.
+- It adds a Windows Firewall rule (group `ZQX`) that lets peers reach `zqxd.exe` over UDP. Thus nodes can connect directly, not through the relay. Uninstallation removes the rule.
 - It keeps the persistent state in `C:\ProgramData\ZQX`.
 - It adds shortcuts in the Start menu and on the desktop, and starts the tray app `zqx-tray.exe`.
 
@@ -34,8 +34,8 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 - A `zqxd.exe` that you start without elevation cannot make that pipe. Set `ZQX_PIPE` (for example `\\.\pipe\zqxd-dev`) for both `zqxd` and `zqx`.
 
 **To add the PC to your xnet:**
-- **With your account:** select **Log in…** from the ZQX tray icon. Your browser opens: log in, check the PC, and click **Connect**.
-- **With a key:** in the console, click **Add device**. Run the command in a terminal. Or copy the command, and select **Join with auth key…** from the tray icon. The tray offers to join with the copied command.
+- **With your account:** select **Log in…** from the ZQX tray icon. Your browser opens: log in, and that is all.
+- **With a key:** in the console, click **Add node**. Run the command in a terminal. Or copy the command, and select **Join with auth key…** from the tray icon. The tray offers to join with the copied command.
 - A user who is not an administrator can log in a PC that has not joined, from the PC's own screen (not over Remote Desktop). **Log out** in the tray menu logs out the person: the PC stays in its xnet. **Log in…** also shows on a PC that joined with a key and has no person. **Reset…** makes the PC leave its xnet.
 - A PC with no label and no person shows, in the tray menu, when it loses access. After that time it shows **Needs identity**. **Log in…**, or a label from an admin, gives the access back.
 
@@ -92,16 +92,16 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 
 **The menu:**
 - The switch at the top connects and disconnects this Mac.
-- **This Mac** shows the device's fabric address. Click it to copy the address.
-- **Peers** opens a submenu of the other devices: a green dot when a device is online, a ring when it is offline. Each device has its own submenu, with **Open** for a web service, **Copy IP Address** and **Copy Name**.
-- **Log In…** (not joined yet) opens your browser: log in, check the Mac, and click **Connect**. A user who is not an administrator can log in this Mac from its own screen.
-- **Join with Auth Key…** opens a window for a pre-auth key, the controller and the device name. The app sends the key to `zqxd` once, and does not save it.
+- **This Mac** shows the node's fabric address. Click it to copy the address.
+- **Peers** opens a submenu of the other nodes: a green dot when a node is online, a ring when it is offline. Each node has its own submenu, with **Open** for a web service, **Copy IP Address** and **Copy Name**.
+- **Log In…** opens your browser: log in, and that is all. A user who is not an administrator can log in this Mac from its own screen. The menu shows **Connected** and, on the next line, **Logged in as** you or **Not logged in**.
+- **Join with Auth Key…** opens a window for a pre-auth key, the controller and the node name. The app sends the key to `zqxd` once, and does not save it.
 - **Log Out…** (a Mac that a person logged in) logs out the person: the Mac stays in its xnet, with its fabric IP and labels. After a login from another computer, the menu shows who logged in, with **Log Out…**.
 - **Log In…** also shows on a Mac that joined with a key and has no person: it adds the person.
 - A Mac with no label and no person shows, at the top of the menu, when it loses access. After that time it shows **This Mac needs identity**. **Log In…**, or a label from an admin, gives the access back.
-- **Reset…** makes the Mac leave its xnet. A login or a new key adds it again, as a new device.
+- **Reset…** makes the Mac leave its xnet. A login or a new key adds it again, as a new node.
 - **Restart ZQX Service…** restarts the LaunchDaemon. macOS asks for an administrator's password.
-- **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the device name, the web console) and **Service** (the daemon's status, socket and log).
+- **Settings…** (⌘,) has three tabs: **General** (open ZQX at login), **Fabric** (the controller, the node name, the web console) and **Service** (the daemon's status, socket and log).
 - **Quit ZQX** closes the app only. This Mac stays connected, because the service keeps running.
 
 **No menu bar icon:** macOS hides icons that do not fit in the menu bar, for example beside the notch. Open ZQX.app again from Finder, Spotlight or Launchpad. This opens Settings.
@@ -156,15 +156,15 @@ The script:
 - installs `zqx`, `zqxd` and `zqx-stir` to `/usr/local/bin`;
 - makes the `zqx` operator group and adds you to it;
 - installs and starts the `zqxd` systemd service (below);
-- asks for an auth key from the console (**Add device**), and joins the xnet. The key is not shown, and it is not written to disk or to the shell history.
+- asks for an auth key from the console (**Add node**), and joins the xnet. The key is not shown, and it is not written to disk or to the shell history.
 
-A hosted xnet needs only the key: the device finds its controller from the key. For a self-hosted controller, give its address:
+A hosted xnet needs only the key: the node finds its controller from the key. For a self-hosted controller, give its address:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | ZQX_SERVER=<address> bash
 ```
 
-On a device that has already joined, press Enter at the key prompt: the script upgrades the binaries and keeps the device's identity.
+On a node that has already joined, press Enter at the key prompt: the script upgrades the binaries and keeps the node's identity.
 
 ### Option 2: by hand
 
@@ -227,19 +227,19 @@ The daemon checks each change against the user that the kernel reports. Read rep
 
 ## Direct connections
 
-Devices connect directly over UDP when they can. When they cannot, they connect through the ZQX relay. All functions work in both cases.
+Nodes connect directly over UDP when they can. When they cannot, they connect through the ZQX relay. All functions work in both cases.
 
-- **The peer port:** each device selects a random peer port (from 20000 to 32767) when it starts for the first time, and keeps it. Thus the port does not collide with ports that routers often use for themselves.
+- **The peer port:** each node selects a random peer port (from 20000 to 32767) when it starts for the first time, and keeps it. Thus the port does not collide with ports that routers often use for themselves.
 - **To see the port,** run `zqx netcheck`. It shows the port and how it appears outside your network.
-- **On cloud machines,** let your devices receive UDP from each other. For example, add a security-group rule that permits UDP from the group itself. Or set a fixed port with `ZQX_LISTEN=0.0.0.0:<port>`, and permit that port only.
+- **On cloud machines,** let your nodes receive UDP from each other. For example, add a security-group rule that permits UDP from the group itself. Or set a fixed port with `ZQX_LISTEN=0.0.0.0:<port>`, and permit that port only.
 
 ## Ping and health checks
 
 - **`ping` reaches all peers.**
   - A peer with the virtual adapter replies from its operating system.
   - A peer without it (`--tun false`, a container, a `zqxnode` app) replies from its daemon, if the access rules permit ICMP.
-- **Other whole IP packets** need the virtual adapter on both devices.
-- **`zqx ping <peer>`** works from all devices. It exits with status 1 when no reply comes. Thus you can use it as a health check.
+- **Other whole IP packets** need the virtual adapter on both nodes.
+- **`zqx ping <peer>`** works from all nodes. It exits with status 1 when no reply comes. Thus you can use it as a health check.
 
 ## Open-source notices
 

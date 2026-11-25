@@ -5,13 +5,13 @@
 
 **Zero Trust. Quantum Safe. Universal eXchange.**
 
-[ZQX](https://zqxnet.com) is a zero-trust fabric network. It connects your devices, servers and cloud workloads securely, from all locations.
+[ZQX](https://zqxnet.com) is a zero-trust fabric network. It connects your computers, servers and cloud workloads securely, from all locations.
 
 - Each connection uses pinned mutual TLS 1.3 with the hybrid post-quantum `X25519MLKEM768` key exchange (X25519 and FIPS 203 ML-KEM-768).
-- Devices connect directly when they can, and through a ZQX relay when they cannot.
+- Nodes connect directly when they can, and through a ZQX relay when they cannot.
 - Access rules decide who can reach what. A request that no rule permits is refused.
 
-This repository has the official ZQX installers, packages and user guides. To manage your network, users and access rules, sign in to the ZQX console at [console.zqxnet.com](https://console.zqxnet.com).
+This repository has the official ZQX installers, packages and user guides. To manage your network, users and access rules, log in to the ZQX console at [console.zqxnet.com](https://console.zqxnet.com).
 
 ## Downloads
 
@@ -20,7 +20,7 @@ The installers and packages for Windows, macOS and Linux are on the [releases pa
 | Platform | Download | Contents |
 | :--- | :--- | :--- |
 | **Windows (installer)** | [`zqx-setup-x86_64.exe`](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-x86_64.exe) | Setup wizard and silent installer: tray app, service, CLI, Wintun |
-| **Windows on ARM (installer)** | [`zqx-setup-arm64.exe`](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-arm64.exe) | The same installer, for ARM64 devices |
+| **Windows on ARM (installer)** | [`zqx-setup-arm64.exe`](https://github.com/zqxnet/releases/releases/latest/download/zqx-setup-arm64.exe) | The same installer, for ARM64 nodes |
 | **Windows (portable)** | [`zqx-windows-x86_64.zip`](https://github.com/zqxnet/releases/releases/latest/download/zqx-windows-x86_64.zip) | Zip archive: tray app (`zqx-tray.exe`), service, CLI, Wintun driver |
 | **macOS (installer)** | [`zqx-macos-arm64.pkg`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.pkg) | Installer package: `ZQX.app`, the `zqxd` LaunchDaemon (virtual adapter) and the CLI in `/usr/local/bin` |
 | **macOS (disk image)** | [`zqx-macos-arm64.dmg`](https://github.com/zqxnet/releases/releases/latest/download/zqx-macos-arm64.dmg) | Disk image: drag `ZQX.app` into `/Applications` |
@@ -32,14 +32,14 @@ For the installation steps, refer to the [installation guide](docs/installation.
 
 ## Quick start
 
-### 1. Add a device to your network
+### 1. Add a node to your network
 
-**With your account:** run `zqx up` on the device. It prints a link (and opens your browser on a desktop). Sign in, check the device, and click **Connect**. On Windows and macOS, you can also select **Sign in…** from the ZQX tray or menu bar icon.
+**With your account:** run `zqx up` on the node. It prints a link (and opens your browser on a desktop). Log in, check the node, and click **Connect**. On Windows and macOS, you can also select **Log in…** from the ZQX tray or menu bar icon.
 
 **With a key** (servers, containers, CI):
 
-1. In the console, click **Add device**.
-2. Copy the command, and run it on the device. It looks like this:
+1. In the console, click **Add node**.
+2. Copy the command, and run it on the node. It looks like this:
 
    ```bash
    zqx up --auth-key zqx_key_...
@@ -47,22 +47,22 @@ For the installation steps, refer to the [installation guide](docs/installation.
 
 On Windows, you can also copy the command and select **Join with auth key…** from the ZQX tray icon.
 
-### 2. Check the device and its peers
+### 2. Check the node and its peers
 
 ```bash
-zqx status                      # this device
-zqx peers                       # the other devices
+zqx status                      # this node
+zqx peers                       # the other nodes
 zqx ping <peer name or IP>      # a ping over the network
 zqx netcheck                    # UDP, the relay and the NAT
 ```
 
 ## Plans and licence
 
-ZQX is proprietary software, with free and paid plans. The price is per **user**, with no limit on personal devices.
+ZQX is proprietary software, with free and paid plans. The price is per **user**, with no limit on personal nodes.
 
 | Plan | Users | Controller | Main features |
 | :--- | :--- | :--- | :--- |
-| **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`) | Fabric DNS, no limit on user devices |
+| **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`) | Fabric DNS, no limit on user nodes |
 | **Starter** | Per user, per month | ZQX hosted | Team SSO, detailed access rules, Fabric DNS |
 | **Premium** | Per user, per month | ZQX hosted | SIEM audit log streaming, sharing across xnets |
 | **Enterprise** | Per user and **per controller** | **Self-hosted controllers** and ZQX hosted | Sovereign, on-premises and air-gapped controllers (14-day evaluation mode), 100G throughput, custom SLA |

@@ -8,7 +8,7 @@
 # Run on the machine (as root, or as a user with sudo):
 #   curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | bash
 #
-# A hosted xnet needs only the key: the device finds its controller from the
+# A hosted xnet needs only the key: the node finds its controller from the
 # key. For a self-hosted controller, give its address:
 #   curl -fsSL https://raw.githubusercontent.com/zqxnet/releases/main/install.sh | ZQX_SERVER=<address> bash
 #
@@ -16,7 +16,7 @@
 # - The key is read without echo, passed to `zqx up` in the environment (not
 #   on the command line), and never written to disk or shell history.
 # - The service uses the `zqx` operator group; the user who runs this is
-#   added to it (sign in again to use `zqx up` and `zqx down` without sudo).
+#   added to it (log in again to use `zqx up` and `zqx down` without sudo).
 
 set -euo pipefail
 
@@ -92,20 +92,20 @@ for _ in $(seq 1 20); do [ -S /var/run/zqx/zqxd.sock ] && break; sleep 0.5; done
 echo "   $(/usr/local/bin/zqxd --version), active"
 
 echo "== Join your xnet"
-echo "   In the console: Add device. Copy the key from the command"
+echo "   In the console: Add node. Copy the key from the command"
 echo "   (the part after --auth-key, including any .suffix)."
 [ -z "$SERVER" ] || echo "   Controller: $SERVER"
 SERVER_ARG=${SERVER:+--server $SERVER }
 read -r -s -p "   Auth key (hidden): " KEY < /dev/tty; echo
 if [ -z "$KEY" ]; then
   if $SUDO test -s /var/lib/zqx/zqxd.state; then
-    echo "== Done: upgraded. The device keeps its identity and its xnet."
+    echo "== Done: upgraded. The node keeps its identity and its xnet."
     exit 0
   fi
   echo "No key given. Join later with: sudo zqx up ${SERVER_ARG}--auth-key <key>"
   exit 1
 fi
-read -r -p "   Device name [$(hostname); it follows the hostname]: " NAME < /dev/tty
+read -r -p "   Node name [$(hostname); it follows the hostname]: " NAME < /dev/tty
 
 # The key reaches `zqx up` on standard input, then in its environment: never
 # on a command line (visible to other users in `ps`).
@@ -117,7 +117,7 @@ if $SUDO bash -c "$JOIN" join "$SERVER" "$NAME" <<< "$KEY"; then
   unset KEY
   echo "== Done"
   /usr/local/bin/zqx status | sed -n 2,8p
-  [ "$TARGET_USER" = root ] || echo "   Sign in again as $TARGET_USER to use zqx up / zqx down without sudo."
+  [ "$TARGET_USER" = root ] || echo "   Log in again as $TARGET_USER to use zqx up / zqx down without sudo."
 else
   unset KEY
   echo "Joining failed. A key can be used up or expired: make a new one in the console and run:"
