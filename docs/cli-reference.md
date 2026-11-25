@@ -97,7 +97,25 @@ zqx login
 - The node opens no browser when it runs as root (`sudo`), over SSH, with no desktop, or as a Windows service. Open the printed link instead.
 - The link works for 10 minutes. Press Ctrl-C to cancel.
 - **A node that joined with a key, with no person:** `zqx login` adds the person. The node keeps its fabric IP and labels, and logs in to its own xnet only: you must be a member of it.
-- A node with a person refuses. Run [`zqx logout`](#zqx-logout) first.
+- A node with a person refuses. Run [`zqx logout`](#zqx-logout) first. **Exception:** from 14 days before the login expires, the same person can log in again (see [Login expiry](#login-expiry)).
+
+### Login expiry
+
+A person's login on a node lasts the xnet's login lifetime: 180 days by default, from 1 to 365 days, or off (**Keys & settings**, **Login lifetime**). Labels never expire.
+
+- **From 14 days before,** `zqx status` shows "Log in again before `<date>` to keep your access on this node." The tray and the menu bar show it, with **Log in again…**, and the tray gives a notice at 14, 3 and 1 days.
+- **Log in again before the date** with `zqx login` or **Log in again…**. The node stays connected, and keeps its fabric IP, name and labels.
+- **At the expiry,** the node is logged out, as by `zqx logout`. It stays in its xnet, connected, and keeps only the access of its labels. `zqx status` shows "Your login on this node expired." Run `zqx login` to log in again.
+- A stream that needed the person is refused with "This node must log in again." Each node checks this by itself, also when the controller cannot be reached.
+- An Owner or Admin can turn login expiry off for one node, extend a login by one day, or log a node out, in the console.
+
+### Node expiry
+
+An xnet can turn on node expiry (off by default; **Keys & settings**). Every node must then be renewed by an Owner or Admin in the console within the period: 30 to 365 days.
+
+- From 14 days before, `zqx status` shows "This node expires on `<date>`. Ask an administrator to renew it." The tray and the menu bar show it too.
+- After the date, the node has no access until it is renewed. It stays in its xnet, with its name and fabric IP.
+- `zqx login` does not renew a node. Ask an Owner or Admin to renew it.
 
 ### Nodes with no identity
 

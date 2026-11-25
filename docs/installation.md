@@ -38,6 +38,8 @@ Download `zqx-setup-x86_64.exe` (Intel and AMD) or `zqx-setup-arm64.exe` (Window
 - **With a key:** in the console, click **Add node**. Run the command in a terminal. Or copy the command, and select **Join with auth key…** from the tray icon. The tray offers to join with the copied command.
 - A user who is not an administrator can log in a PC that has not joined, from the PC's own screen (not over Remote Desktop). **Log out** in the tray menu logs out the person: the PC stays in its xnet. **Log in…** also shows on a PC that joined with a key and has no person. **Reset…** makes the PC leave its xnet.
 - A PC with no label and no person shows, in the tray menu, when it loses access. After that time it shows **Needs identity**. **Log in…**, or a label from an admin, gives the access back.
+- **Login expiry:** from 14 days before your login on the PC expires, the tray menu shows "Log in again before `<date>`" and **Log in again…**, with a notice at 14, 3 and 1 days. After the expiry the PC is logged out and keeps the access of its labels: **Log in again…** gives your access back.
+- **Node expiry** (if your xnet uses it): from 14 days before the date, the tray menu says when the PC expires. An administrator renews it in the console; after the date the PC has no access until then.
 
 **The tray icon:**
 - Four corner dots and a green Q: connected.
@@ -98,6 +100,8 @@ The disk image holds the same package as `zqx-macos-arm64.pkg`. When the package
 - **Join with Auth Key…** opens a window for a pre-auth key, the controller and the node name. The app sends the key to `zqxd` once, and does not save it.
 - **Log Out…** (a Mac that a person logged in) logs out the person: the Mac stays in its xnet, with its fabric IP and labels. After a login from another computer, the menu shows who logged in, with **Log Out…**.
 - **Log In…** also shows on a Mac that joined with a key and has no person: it adds the person.
+- **Login expiry:** from 14 days before your login on this Mac expires, the icon has a badge, and the menu shows "Log in again before `<date>`" with **Log In Again…**. After the expiry the Mac is logged out and keeps the access of its labels; **Log In Again…** gives your access back.
+- **Node expiry** (if your xnet uses it): from 14 days before the date, the menu says when this Mac expires. An administrator renews it in the console.
 - A Mac with no label and no person shows, at the top of the menu, when it loses access. After that time it shows **This Mac needs identity**. **Log In…**, or a label from an admin, gives the access back.
 - **Reset…** makes the Mac leave its xnet. A login or a new key adds it again, as a new node.
 - **Restart ZQX Service…** restarts the LaunchDaemon. macOS asks for an administrator's password.
