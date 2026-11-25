@@ -302,7 +302,7 @@ zqx labels --json
 - Labels are lower case. A label has 160 characters at most, and a node has 32 labels at most.
 - A node has one value for each key in a namespace: one `ops:env`, not two.
 - Namespaces that start with `zqx` are reserved. `zqx` holds ZQX's services, for example `zqx:relay`. `zqx-<name>` holds the services of a provider that ZQX registers. An admin cannot set a provider's labels.
-- Words of the access rules are not namespaces: `group`, `autogroup`, `node`, `user`, `tag`, `label`, `svc`, `system`, `fabric`, `xnet`, `internet`, `self`, `any`, `all`, `none`, `identity`, `target`, `src`, `dst`, `port` and `proto`.
+- Words of the access rules are not namespaces: `group`, `autogroup`, `team`, `node`, `user`, `tag`, `label`, `svc`, `system`, `fabric`, `xnet`, `internet`, `self`, `any`, `all`, `none`, `identity`, `target`, `src`, `dst`, `port` and `proto`.
 - In an access rule, `ops:env` selects every node with the key `ops:env`. `ops:env=prod` selects only the nodes with that value.
 
 ### `zqx share`
