@@ -230,6 +230,25 @@ With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
 - `--json` gives the same counters in `probes`.
 - A relayed pair that hears nothing on the direct path for 2 minutes stops its direct probes for 3 minutes, then looks again. Thus a router entry that went wrong (a peer's restart can do that) expires, and the next probe makes a new one. The daemon's log says when it pauses.
 
+**`--stats`:** for each connected peer, one line for each open connection, with its statistics since it opened. Use it when a transfer to a peer is slow.
+
+```text
+             dialed direct 203.0.113.7:47001: rtt 301.5 ms, window 664.7 KB, sent 37550 packets, lost 33 (0.09%), congestion events 33, mtu 1452, tx 47.0 MB, rx 1.2 MB
+             lane direct 203.0.113.7:47001: rtt 301.6 ms, window 120.0 KB, sent 8211 packets, lost 7 (0.09%), congestion events 6, mtu 1452, tx 10.3 MB, rx 0.4 MB
+```
+
+| Field | What it says |
+| --- | --- |
+| `dialed`, `accepted`, `lane` | Who opened the connection: this node, the peer, or a lane (an extra connection for more cores) |
+| `direct <address>`, `relay` | The path, and the peer's address on a direct path |
+| `rtt` | The smoothed round trip. Far above the path's round trip (`zqx ping`), it shows a queue on the way |
+| `window` | The congestion window: how much data can be in flight. A transfer is at most window ÷ round trip |
+| `lost`, `congestion events` | Packets lost on the path, and how often the sender reduced its window |
+| `mtu` | The packet size in use |
+| `tx`, `rx` | Bytes sent and received on the connection |
+
+`--json` gives the same values in `connections` (the round trip as `rtt_us`, in microseconds).
+
 ### `zqx ping`
 
 Ping a peer over the fabric. The output shows the round-trip time and the path: direct, or through the relay.
