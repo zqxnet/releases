@@ -30,6 +30,8 @@ The installers and packages for Windows, macOS and Linux are on the [releases pa
 
 For the installation steps, refer to the [installation guide](docs/installation.md). For the commands, refer to the [CLI reference](docs/cli-reference.md).
 
+To run your own controller, free, refer to [Run your own controller](docs/self-hosted-controller.md).
+
 ## Quick start
 
 ### 1. Add a node to your network
