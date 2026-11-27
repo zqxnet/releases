@@ -18,27 +18,65 @@ Your nodes' traffic never goes through ZQX. The controller connects to ZQX so th
 
 ## What you need
 
-- A Linux machine (x86-64) with Docker. A server, a virtual machine or a cloud instance.
-- A public IP address or DNS name for the machine.
-- Inbound UDP and TCP port 443 open to the internet, for your nodes.
-- Outbound HTTPS (TCP 443) to `console.zqxnet.com`, and to `ghcr.io` for the controller image.
+- A Linux machine (x86-64) with Docker, or a Kubernetes cluster with x86-64 nodes.
+- Outbound HTTPS (TCP 443) to `fabric.zqxnet.com` (the controller's link to ZQX) and to `ghcr.io` (the controller image).
+- Your nodes must reach the machine on UDP and TCP port 443.
+  - In a private network, nodes in that network reach it. You do not need a public address or a port forward.
+  - For nodes in other networks, give the machine a public address or a port forward, and set `ZQX_PUBLIC_ADDR` (refer to [The address that nodes use](#the-address-that-nodes-use)).
+
+ZQX never connects to the machine. The controller connects out.
 
 ## Install
 
-1. In the console (`https://console.zqxnet.com`), open **Controllers** and click **Add your own controller**.
-2. Enter a name (lower-case letters, digits and hyphens, for example `home-lab`) and the machine's public address (for example `203.0.113.24`). Add `:port` if your nodes reach it on a port other than 443.
-3. Click **Get the install command**, then **Copy**.
-4. Run the command on the machine. If your user is not in the `docker` group, run `sudo -s` first, then the command.
+1. In the console (`https://console.zqxnet.com`), open **Controllers** and click **Add your own controller**. The console makes a connection token.
+2. Under **Start it with**, choose **Docker**, **Compose** or **Kubernetes**, then click its **Copy** button.
+3. On the machine, start the controller with what you copied:
+   - **Docker:** run the command. If your user is not in the `docker` group, run `sudo -s` first.
+   - **Compose:** save the file as `compose.yaml`, then run `docker compose up -d`.
+   - **Kubernetes:** save the file as `zqx-controller.yaml`, then run `kubectl apply -f zqx-controller.yaml`.
+4. Wait for the console. It shows **connected**, with the controller's name and the address that your nodes use.
 
-The command pulls the controller image `ghcr.io/zqxnet/zqx-control` by its version and digest, and starts the controller. Docker checks the image against the digest: a different image does not start.
+To use your own configuration, set `ZQX_SAAS_TOKEN` to the token. Refer to [Settings](#settings).
 
-The command holds your controller's licence. Keep it like a password. You can get it again in the console.
+**The connection token:**
+- It works once, for 24 hours.
+- Keep it like a password until it is used. After that it does nothing: the controller keeps its licence in its volume.
+- The console shows it once. **Make a new token** replaces it, and **Revoke token** stops it.
 
-The console shows **Connected** when the controller is up. To check on the machine:
+**The name:** the controller takes the machine's host name. To give another name, set `ZQX_CONTROLLER_NAME`.
+
+**To check on the machine:**
 
 ```bash
 docker logs zqx-controller
 ```
+
+The log shows the address that the controller found, for example "Nodes reach this controller at 10.0.0.5:443: found on this machine."
+
+## The address that nodes use
+
+The controller finds the address itself, from the machine's route to the internet:
+
+| The machine has | Nodes reach it at |
+| --- | --- |
+| A public address of its own | That public address |
+| A private address only | Its private address. Only nodes in that network reach it |
+
+**To give another address** (a DNS name, a port forward or a load balancer), set `ZQX_PUBLIC_ADDR` on the controller, for example `ZQX_PUBLIC_ADDR=ctrl.example.com` or `ZQX_PUBLIC_ADDR=203.0.113.24:8443`. Then start the controller again.
+
+## Settings
+
+The examples in the console set these values. Set them in your own configuration in the same way.
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| `ZQX_SAAS_TOKEN` | The connection token | Joins the controller to your account, once |
+| `ZQX_SAAS_MANAGEMENT` | `full` | Lets the console create and change the xnets on it |
+| `ZQX_RELAY` | `true` | Its own relay, for nodes that cannot connect directly |
+| `ZQX_PUBLIC_ADDR` | Optional | The address that nodes use, when the found one is not right |
+| `ZQX_CONTROLLER_NAME` | Optional | The name in the console, in place of the host name |
+
+Keep the state in a volume at `/var/lib/zqx`, and use the host network (`--network host`, `network_mode: host` or `hostNetwork: true`), so that the controller sees the machine's addresses.
 
 ## Create its xnets
 
@@ -48,24 +86,28 @@ docker logs zqx-controller
 
 ## Update
 
-The console says when your controller needs an update, for example "Update home-lab". Until you update it, ZQX does not accept its connection, and you cannot change its xnets from the console. Nodes that are connected keep working.
+The console says when your controller needs an update, for example "Update home-lab", and shows the image of the new version. Until you update it, ZQX does not accept its connection, and you cannot change its xnets from the console. Nodes that are connected keep working.
 
-1. In the console, click **Show install command**, then **Get the install command**, then **Copy**.
-2. On the machine, remove the old container. Its keys and xnets stay in the `zqx-controller` volume.
+Start the controller again with the new image. Its keys, its xnets and its licence stay in its volume, so it needs no new token.
 
-   ```bash
-   docker rm -f zqx-controller
-   ```
+- **Docker:** remove the container, then run the same command with the new image.
 
-3. Run the new command.
-4. Optional: remove the old images.
+  ```bash
+  docker rm -f zqx-controller
+  ```
 
-   ```bash
-   docker image prune -a --filter "label=org.opencontainers.image.title=ZQX controller"
-   ```
+- **Compose:** change the `image:` line, then run `docker compose up -d`.
+- **Kubernetes:** change the `image:` line, then run `kubectl apply -f zqx-controller.yaml`.
+
+Optional: remove the old images.
+
+```bash
+docker image prune -a --filter "label=org.opencontainers.image.title=ZQX controller"
+```
 
 ## The licence
 
+- The controller gets it from ZQX when it connects with the token, and keeps it in its volume.
 - It lasts 90 days. ZQX renews it while the controller is connected, from 30 days before it expires.
 - The controller's log warns from 14 days before it expires.
 - After it expires, the controller admits no new nodes and no new xnets. Nodes that joined stay connected. Connect the controller to ZQX again to renew it.
@@ -73,16 +115,19 @@ The console says when your controller needs an update, for example "Update home-
 ## Remove
 
 1. In the console, delete the xnets on the controller (**Keys & settings**, **Delete xnet**).
-2. On the machine, remove the container and its volume. This deletes the controller's keys and data, and you cannot undo it.
+2. On the machine, remove the controller and its state. This deletes the controller's keys and data, and you cannot undo it.
+   - **Docker:**
 
-   ```bash
-   docker rm -f zqx-controller
-   ```
+     ```bash
+     docker rm -f zqx-controller
+     ```
 
-   ```bash
-   docker volume rm zqx-controller
-   ```
+     ```bash
+     docker volume rm zqx-controller
+     ```
 
+   - **Compose:** run `docker compose down -v`.
+   - **Kubernetes:** run `kubectl delete -f zqx-controller.yaml`, then delete its volume claim: `kubectl delete pvc state-zqx-controller-0`.
 3. Optional: remove the image.
 
    ```bash
@@ -93,18 +138,19 @@ The console says when your controller needs an update, for example "Update home-
 
 | Port | Direction | For |
 | --- | --- | --- |
-| UDP 443 | Inbound | Your nodes (QUIC), and the controller's relay |
-| TCP 443 | Inbound | Your nodes on networks that block UDP |
-| TCP 443 | Outbound | The connection to `console.zqxnet.com`, and the image from `ghcr.io` |
+| UDP 443 | Inbound, from your nodes | Your nodes (QUIC), and the controller's relay |
+| TCP 443 | Inbound, from your nodes | Your nodes on networks that block UDP |
+| TCP 443 | Outbound | The connection to `fabric.zqxnet.com`, and the image from `ghcr.io` |
 
 ## Problems
 
 | What you see | What to do |
 | --- | --- |
-| The console shows **Not connected** | Check the outbound HTTPS connection to `console.zqxnet.com`, and `docker logs zqx-controller` |
+| The console still says it is waiting | Check the outbound HTTPS connection to `fabric.zqxnet.com`, and `docker logs zqx-controller` |
+| "This connection token was used already", "expired" or "was revoked" | In the console, click **Add your own controller** again for a new token, and start the controller with it |
 | The log says "ZQX now needs" a version | Update the controller (above) |
-| Nodes cannot join | Check that UDP and TCP port 443 reach the machine from the internet, and that the public address in the install command is right |
-| "Your plan includes one self-hosted controller, and it is connected" | Your licence is in use on another machine. Stop that controller first |
+| Nodes cannot join | Check that UDP and TCP port 443 reach the machine from the nodes. For nodes outside its network, set `ZQX_PUBLIC_ADDR` |
+| "Your plan includes one controller, and … is connected" | Stop that controller first, then make a new token |
 | "Your controller holds 2 xnets" | Delete an xnet on it, or upgrade the plan |
 
 ## Licence
