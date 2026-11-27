@@ -47,9 +47,9 @@ jobs:
           for name in zqx-control zqx; do
             mkdir -p "$name.dir"
             tar -C "$name.dir" -xzf "$name-registry-image-linux-amd64.tar.gz"
-            src=$(skopeo inspect --format '{{index .Labels "org.opencontainers.image.source"}}' "dir:$name.dir")
+            src=$(skopeo inspect --override-os linux --override-arch amd64 --format '{{index .Labels "org.opencontainers.image.source"}}' "dir:$name.dir")
             test "$src" = "https://github.com/$GITHUB_REPOSITORY"
-            test "$(skopeo inspect --format '{{index .Labels "org.opencontainers.image.version"}}' "dir:$name.dir")" = "$VERSION"
+            test "$(skopeo inspect --override-os linux --override-arch amd64 --format '{{index .Labels "org.opencontainers.image.version"}}' "dir:$name.dir")" = "$VERSION"
           done
 
       - name: Push to ghcr.io, digests kept
@@ -58,8 +58,10 @@ jobs:
           for name in zqx-control zqx; do
             ref="ghcr.io/zqxnet/$name:$VERSION"
             digest="sha256:$(sha256sum "$name.dir/manifest.json" | cut -d' ' -f1)"
-            skopeo copy -q --preserve-digests --dest-creds "$GITHUB_ACTOR:$GH_TOKEN" "dir:$name.dir" "docker://$ref"
-            pushed=$(skopeo inspect --creds "$GITHUB_ACTOR:$GH_TOKEN" --format '{{.Digest}}' "docker://$ref")
+            # The image is an OCI index (the image and its provenance): --all
+            # pushes all of it, so the digest stays.
+            skopeo copy -q --all --preserve-digests --dest-creds "$GITHUB_ACTOR:$GH_TOKEN" "dir:$name.dir" "docker://$ref"
+            pushed="sha256:$(skopeo inspect --raw --creds "$GITHUB_ACTOR:$GH_TOKEN" "docker://$ref" | sha256sum | cut -d' ' -f1)"
             test "$pushed" = "$digest"
             echo "$ref -> $digest"
             echo "- \`$ref\` → \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
