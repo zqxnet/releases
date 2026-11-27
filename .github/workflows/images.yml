@@ -1,0 +1,68 @@
+name: Images
+
+# Publishes the container images of a release as packages of this
+# repository, from the image files attached to the release v<version>:
+#   zqx-control-image-linux-amd64.tar.gz -> ghcr.io/zqxnet/zqx-control:<version>
+#   zqx-image-linux-amd64.tar.gz         -> ghcr.io/zqxnet/zqx:<version>
+# Each file is checked against its .sha256 before it is loaded. Started by
+# the release (repository_dispatch "images"), or by hand for a version.
+on:
+  repository_dispatch:
+    types: [ images ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "A published version, for example 0.21.3"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: images-${{ github.event.client_payload.version || inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish the images
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ github.event.client_payload.version || inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check the version
+        run: echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+
+      - name: Download and check the image files
+        run: |
+          set -eu
+          gh release download "v$VERSION" -R "$GITHUB_REPOSITORY" \
+            -p 'zqx-control-image-linux-amd64.tar.gz' -p 'zqx-control-image-linux-amd64.tar.gz.sha256' \
+            -p 'zqx-image-linux-amd64.tar.gz' -p 'zqx-image-linux-amd64.tar.gz.sha256'
+          sha256sum -c zqx-control-image-linux-amd64.tar.gz.sha256 zqx-image-linux-amd64.tar.gz.sha256
+
+      - name: Load the images
+        run: |
+          set -eu
+          docker load -q -i zqx-control-image-linux-amd64.tar.gz
+          docker load -q -i zqx-image-linux-amd64.tar.gz
+          for img in "zqx-control:$VERSION" "zqx:$VERSION"; do
+            src=$(docker image inspect -f '{{index .Config.Labels "org.opencontainers.image.source"}}' "$img")
+            test "$src" = "https://github.com/$GITHUB_REPOSITORY"
+          done
+
+      - name: Push to ghcr.io
+        run: |
+          set -eu
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          for name in zqx-control zqx; do
+            ref="ghcr.io/zqxnet/$name:$VERSION"
+            docker tag "$name:$VERSION" "$ref"
+            docker push -q "$ref"
+            digest=$(docker image inspect -f '{{range .RepoDigests}}{{println .}}{{end}}' "$ref" | grep "^ghcr.io/zqxnet/$name@" | head -1)
+            echo "$ref -> $digest"
+            echo "- \`$ref\` → \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+          docker logout ghcr.io
