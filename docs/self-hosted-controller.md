@@ -21,8 +21,7 @@ Your nodes' traffic never goes through ZQX. The controller connects to ZQX so th
 - A Linux machine (x86-64) with Docker. A server, a virtual machine or a cloud instance.
 - A public IP address or DNS name for the machine.
 - Inbound UDP and TCP port 443 open to the internet, for your nodes.
-- Outbound HTTPS (TCP 443) to `console.zqxnet.com`, and to `github.com` for the download of the controller image (about 35 MB).
-- `curl` and `sha256sum` (most Linux systems have both).
+- Outbound HTTPS (TCP 443) to `console.zqxnet.com`, and to `ghcr.io` for the controller image.
 
 ## Install
 
@@ -31,7 +30,7 @@ Your nodes' traffic never goes through ZQX. The controller connects to ZQX so th
 3. Click **Get the install command**, then **Copy**.
 4. Run the command on the machine. If your user is not in the `docker` group, run `sudo -s` first, then the command.
 
-The command downloads the controller image from the ZQX releases page, checks its SHA-256, loads it into Docker, and starts the controller. If the check fails, it stops before anything starts.
+The command pulls the controller image `ghcr.io/zqxnet/zqx-control` by its version and digest, and starts the controller. Docker checks the image against the digest: a different image does not start.
 
 The command holds your controller's licence. Keep it like a password. You can get it again in the console.
 
@@ -59,10 +58,10 @@ The console says when your controller needs an update, for example "Update home-
    ```
 
 3. Run the new command.
-4. Optional: remove the old image. Replace `<old version>` with the version it ran, for example `0.21.0`.
+4. Optional: remove the old images.
 
    ```bash
-   docker image rm zqx-control:<old version>
+   docker image prune -a --filter "label=org.opencontainers.image.title=ZQX controller"
    ```
 
 ## The licence
@@ -84,10 +83,10 @@ The console says when your controller needs an update, for example "Update home-
    docker volume rm zqx-controller
    ```
 
-3. Optional: remove the image. Replace `<version>` with the version it ran.
+3. Optional: remove the image.
 
    ```bash
-   docker image rm zqx-control:<version>
+   docker image prune -a --filter "label=org.opencontainers.image.title=ZQX controller"
    ```
 
 ## Ports
@@ -96,7 +95,7 @@ The console says when your controller needs an update, for example "Update home-
 | --- | --- | --- |
 | UDP 443 | Inbound | Your nodes (QUIC), and the controller's relay |
 | TCP 443 | Inbound | Your nodes on networks that block UDP |
-| TCP 443 | Outbound | The connection to `console.zqxnet.com` |
+| TCP 443 | Outbound | The connection to `console.zqxnet.com`, and the image from `ghcr.io` |
 
 ## Problems
 
@@ -110,4 +109,4 @@ The console says when your controller needs an update, for example "Update home-
 
 ## Licence
 
-The controller is ZQX software under the [ZQX Proprietary Software EULA](https://github.com/zqxnet/releases/blob/main/LICENSE). The image holds the EULA and the third-party notices in `/usr/share/doc/zqx/`.
+The controller is ZQX software under the [ZQX Proprietary Software EULA](https://github.com/zqxnet/releases/blob/main/LICENSE). The image holds the EULA and the third-party notices in `/usr/share/doc/zqx/`. Each release also has the image as a file (`zqx-control-image-linux-amd64.tar.gz`, with its `.sha256`), for a machine that loads images from files.

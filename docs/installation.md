@@ -12,6 +12,7 @@ All files are on the [releases page](https://github.com/zqxnet/releases/releases
 | macOS | The app only | `zqx-macos-arm64.dmg` (drag `ZQX.app` to `Applications`) |
 | macOS | The command line only | `zqx-macos-arm64.tar.gz` |
 | Linux | The binaries and a systemd service | `zqx-linux-amd64.tar.gz` |
+| Docker, Kubernetes | A node in a container | The image `ghcr.io/zqxnet/zqx:<version>` |
 
 ## Windows
 
@@ -228,6 +229,53 @@ sudo usermod -aG zqx <user>
 ```
 
 The daemon checks each change against the user that the kernel reports. Read replies hold no keys or secrets.
+
+## Containers
+
+The node image is `ghcr.io/zqxnet/zqx:<version>` (Linux x86-64). It holds `zqxd` and the `zqx` command line. Use the version of the latest release, for example `0.21.3`.
+
+**What it does by default:**
+- It runs as the user `zqx`, with no extra capabilities.
+- It has no virtual adapter (`ZQX_TUN=false`). Apps in the container reach peers through the SOCKS5 proxy on port 1080, or through `--forward`. Peers reach the container's services that you publish with `--service`. `zqx ping` works.
+- It keeps its keys and its fabric IP in the volume `/var/lib/zqx`. After a restart it connects again with no key.
+
+**To start a node with Docker,** make a pre-auth key in the console (**Nodes**, **Add a node**), then run:
+
+```bash
+docker run -d --name zqx --restart unless-stopped -v zqx-state:/var/lib/zqx -e ZQX_SERVER=fabric.zqxnet.com -e ZQX_AUTH_TOKEN=<key> ghcr.io/zqxnet/zqx:<version>
+```
+
+**To check it:**
+
+```bash
+docker exec zqx zqx status
+```
+
+**With Docker Compose:**
+
+```yaml
+services:
+  zqx:
+    image: ghcr.io/zqxnet/zqx:<version>
+    restart: unless-stopped
+    environment:
+      ZQX_SERVER: fabric.zqxnet.com
+      ZQX_AUTH_TOKEN: <key>
+    volumes:
+      - zqx-state:/var/lib/zqx
+volumes:
+  zqx-state:
+```
+
+**With the virtual adapter** (whole IP packets, the operating system's `ping`), the container runs as root with one capability and the TUN device:
+
+```bash
+docker run -d --name zqx --restart unless-stopped --user 0 --cap-add NET_ADMIN --device /dev/net/tun -v zqx-state:/var/lib/zqx -e ZQX_TUN=true -e ZQX_SERVER=fabric.zqxnet.com -e ZQX_AUTH_TOKEN=<key> ghcr.io/zqxnet/zqx:<version>
+```
+
+**For a fixed peer port** (direct connections through a firewall), add `-e ZQX_LISTEN=0.0.0.0:<port> -p <port>:<port>/udp`.
+
+Each release also has the image as a file (`zqx-image-linux-amd64.tar.gz`, with its `.sha256`), for a machine that loads images from files with `docker load`.
 
 ## Direct connections
 
