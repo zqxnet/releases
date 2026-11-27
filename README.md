@@ -64,7 +64,7 @@ ZQX is proprietary software, with free and paid plans. The price is per **user**
 
 | Plan | Users | Controller | Main features |
 | :--- | :--- | :--- | :--- |
-| **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`) | Fabric DNS, no limit on user nodes |
+| **Personal** | **Free, up to 10 users** | ZQX hosted (`console.zqxnet.com`), and one controller of your own | Fabric DNS; 50 nodes in the hosted xnet, no limit in the xnets on your own controller |
 | **Starter** | Per user, per month | ZQX hosted | Team SSO, detailed access rules, Fabric DNS |
 | **Premium** | Per user, per month | ZQX hosted | SIEM audit log streaming, sharing across xnets |
 | **Enterprise** | Per user and **per controller** | **Self-hosted controllers** and ZQX hosted | Sovereign, on-premises and air-gapped controllers (14-day evaluation mode), 100G throughput, custom SLA |
