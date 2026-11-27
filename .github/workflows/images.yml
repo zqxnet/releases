@@ -1,18 +1,20 @@
 name: Images
 
 # Publishes the container images of a release as packages of this
-# repository, from the image files attached to the release v<version>:
-#   zqx-control-image-linux-amd64.tar.gz -> ghcr.io/zqxnet/zqx-control:<version>
-#   zqx-image-linux-amd64.tar.gz         -> ghcr.io/zqxnet/zqx:<version>
-# Each file is checked against its .sha256 before it is loaded. Started by
-# the release (repository_dispatch "images"), or by hand for a version.
+# repository, with the digests they were built with (the same image that ZQX
+# runs), from the registry files attached to the release v<version>:
+#   zqx-control-registry-image-linux-amd64.tar.gz -> ghcr.io/zqxnet/zqx-control:<version>
+#   zqx-registry-image-linux-amd64.tar.gz         -> ghcr.io/zqxnet/zqx:<version>
+# Each file is checked against its .sha256, and its manifest against the
+# digest it names, before it is pushed (skopeo --preserve-digests). Started
+# by the release (repository_dispatch "images"), or by hand for a version.
 on:
   repository_dispatch:
     types: [ images ]
   workflow_dispatch:
     inputs:
       version:
-        description: "A published version, for example 0.21.3"
+        description: "A published version, for example 0.23.0"
         required: true
         type: string
 
@@ -35,34 +37,30 @@ jobs:
       - name: Check the version
         run: echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
 
-      - name: Download and check the image files
+      - name: Download and check the registry files
         run: |
           set -eu
           gh release download "v$VERSION" -R "$GITHUB_REPOSITORY" \
-            -p 'zqx-control-image-linux-amd64.tar.gz' -p 'zqx-control-image-linux-amd64.tar.gz.sha256' \
-            -p 'zqx-image-linux-amd64.tar.gz' -p 'zqx-image-linux-amd64.tar.gz.sha256'
-          sha256sum -c zqx-control-image-linux-amd64.tar.gz.sha256 zqx-image-linux-amd64.tar.gz.sha256
-
-      - name: Load the images
-        run: |
-          set -eu
-          docker load -q -i zqx-control-image-linux-amd64.tar.gz
-          docker load -q -i zqx-image-linux-amd64.tar.gz
-          for img in "zqx-control:$VERSION" "zqx:$VERSION"; do
-            src=$(docker image inspect -f '{{index .Config.Labels "org.opencontainers.image.source"}}' "$img")
+            -p 'zqx-control-registry-image-linux-amd64.tar.gz' -p 'zqx-control-registry-image-linux-amd64.tar.gz.sha256' \
+            -p 'zqx-registry-image-linux-amd64.tar.gz' -p 'zqx-registry-image-linux-amd64.tar.gz.sha256'
+          sha256sum -c zqx-control-registry-image-linux-amd64.tar.gz.sha256 zqx-registry-image-linux-amd64.tar.gz.sha256
+          for name in zqx-control zqx; do
+            mkdir -p "$name.dir"
+            tar -C "$name.dir" -xzf "$name-registry-image-linux-amd64.tar.gz"
+            src=$(skopeo inspect --format '{{index .Labels "org.opencontainers.image.source"}}' "dir:$name.dir")
             test "$src" = "https://github.com/$GITHUB_REPOSITORY"
+            test "$(skopeo inspect --format '{{index .Labels "org.opencontainers.image.version"}}' "dir:$name.dir")" = "$VERSION"
           done
 
-      - name: Push to ghcr.io
+      - name: Push to ghcr.io, digests kept
         run: |
           set -eu
-          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           for name in zqx-control zqx; do
             ref="ghcr.io/zqxnet/$name:$VERSION"
-            docker tag "$name:$VERSION" "$ref"
-            docker push -q "$ref"
-            digest=$(docker image inspect -f '{{range .RepoDigests}}{{println .}}{{end}}' "$ref" | grep "^ghcr.io/zqxnet/$name@" | head -1)
+            digest="sha256:$(sha256sum "$name.dir/manifest.json" | cut -d' ' -f1)"
+            skopeo copy -q --preserve-digests --dest-creds "$GITHUB_ACTOR:$GH_TOKEN" "dir:$name.dir" "docker://$ref"
+            pushed=$(skopeo inspect --creds "$GITHUB_ACTOR:$GH_TOKEN" --format '{{.Digest}}' "docker://$ref")
+            test "$pushed" = "$digest"
             echo "$ref -> $digest"
             echo "- \`$ref\` → \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
           done
-          docker logout ghcr.io
