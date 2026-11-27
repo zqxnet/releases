@@ -114,10 +114,22 @@ docker image prune -a --filter "label=org.opencontainers.image.title=ZQX control
 - The controller's log warns from 14 days before it expires.
 - After it expires, the controller admits no new nodes and no new xnets. Nodes that joined stay connected. Connect the controller to ZQX again to renew it.
 
+**The recovery key:** the controller keeps a recovery key in its volume, and nodes pin it. Optional: keep a copy apart.
+
+```bash
+docker exec zqx-controller zqx-control recovery-key export --out /var/lib/zqx/recovery-copy.key
+```
+
+Then copy that file from the volume to a safe place, and delete it from the volume.
+
 ## Remove
 
-1. In the console, delete the xnets on the controller (**Keys & settings**, **Delete xnet**).
-2. On the machine, remove the controller and its state. This deletes the controller's keys and data, and you cannot undo it.
+1. In the console, on the Controllers page, open the controller's actions and click **Remove controller…**.
+2. Read what goes with it: each xnet on the controller, with its nodes, keys, access rules and members. You cannot undo it.
+3. Choose your Google account again, then type the controller's name, and click **Remove controller**.
+   - The xnets on it are deleted, and its licence is revoked. Your plan's controller is free for another.
+   - A controller that is connected stops admitting nodes at once. A controller that is not connected is removed in ZQX: its nodes on the machine keep their state until you remove the machine.
+4. On the machine, remove the controller and its state. This deletes the controller's keys and data. The console shows these commands too.
    - **Docker:**
 
      ```bash
@@ -130,11 +142,13 @@ docker image prune -a --filter "label=org.opencontainers.image.title=ZQX control
 
    - **Compose:** run `docker compose down -v`.
    - **Kubernetes:** run `kubectl delete -f zqx-controller.yaml`, then delete its volume claim: `kubectl delete pvc state-zqx-controller-0`.
-3. Optional: remove the image.
+5. Optional: remove the image.
 
    ```bash
    docker image prune -a --filter "label=org.opencontainers.image.title=ZQX controller"
    ```
+
+If a removed controller starts again, ZQX refuses it, and its log says what to run. To use it again, add it with a new connection token.
 
 ## Ports
 
@@ -151,8 +165,10 @@ docker image prune -a --filter "label=org.opencontainers.image.title=ZQX control
 | The console still says it is waiting | Check the outbound HTTPS connection to `fabric.zqxnet.com`, and `docker logs zqx-controller` |
 | "This connection token was used already", "expired" or "was revoked" | In the console, click **Add your own controller** again for a new token, and start the controller with it |
 | The log says "ZQX now needs" a version | Update the controller (above) |
-| Nodes cannot join | Check that UDP and TCP port 443 reach the machine from the nodes. For nodes outside its network, use **Change address…** or set `ZQX_PUBLIC_ADDR` |
-| "Your plan includes one controller, and … is connected" | Stop that controller first, then make a new token |
+| Nodes cannot join | Run `zqx status` on the node: it shows why the controller refused it, for example a key for one node that was used already. Check that UDP and TCP port 443 reach the machine from the nodes. For nodes outside its network, use **Change address…** or set `ZQX_PUBLIC_ADDR` |
+| "Your plan includes one controller, and … is connected" | Remove that controller (**Remove controller…**), or stop it, then make a new token |
+| The console shows the controller as **Disconnected** | Check that the machine runs it (`docker ps`) and its outbound HTTPS connection. If the machine is gone, use **Remove controller…** |
+| The log says "This controller was removed from your ZQX account" | Remove it from the machine (above), or add it again with a new connection token |
 | "Your controller holds 2 xnets" | Delete an xnet on it, or upgrade the plan |
 
 ## Licence

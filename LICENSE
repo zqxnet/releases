@@ -11,8 +11,8 @@ SECTION 6).
 
 1. PROPRIETARY OWNERSHIP
    All ZQX software components—including `zqx` (CLI), `zqxd` (node daemon),
-   `zqx-tray` and `ZQX.app` (desktop clients), `zqxnet` (SDK), `zqx-core`,
-   `zqx-proto`, `zqx-tunnel`, `zqx-ns`, `zqx-stir`, `zqx-wasm`, `zqx-control`
+   `zqx-tray` and `ZQX.app` (desktop clients), `zqxnode` (SDK), `zqx-core`,
+   `zqx-proto`, `zqx-tunnel`, `zqx-ns`, `zqx-stir`, `zqx-control`
    (controller), `zqx-console`, and `zqx-saas`—and all related source code,
    object code, protocols, and documentation (collectively, the "Software"),
    except the Third-Party Components (Section 6), are the exclusive proprietary

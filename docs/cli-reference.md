@@ -67,7 +67,7 @@ The node asks ZQX (`fabric.zqxnet.com`) where your xnet's controllers are, and c
 
 | Option | Environment | Meaning |
 | --- | --- | --- |
-| `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the node to its xnet's controllers. A self-hosted controller takes its own address. |
+| `--server <address>` | `ZQX_SERVER` | The controller. The default with a key is `fabric.zqxnet.com`: ZQX directs the node to its xnet's controllers. A self-hosted controller takes its own address. `console.zqxnet.com` is the website, not a server: it is refused. |
 | `--auth-key <key>` (alias `--auth-token`) | `ZQX_AUTH_TOKEN` | The pre-auth key from the console. A key of the form `<key>.<controller node ID>` also pins the controller. |
 | `--hostname <name>` | `ZQX_NAME` | Fix the node's name. Without it, the name follows the OS hostname, also when the hostname changes (checked each minute; the node then starts a new controller session with the new name). `--hostname auto` lets the name follow the hostname again. A name that an admin gives the node in the console wins over both, until the admin chooses **Use the node's hostname**. Two nodes with one name in an xnet: the later one gets `-2`, `-3` and so on. |
 | `--ephemeral[=true\|false]` | `ZQX_EPHEMERAL` | Mark the node as short-lived (for example a CI runner or a container). The daemon keeps this setting. It accepts `true`, `false`, `1`, `0`, `yes` and `no`. The controller removes an ephemeral node when it leaves (`zqx down`), or when it stays offline longer than the xnet's timeout (10 minutes by default; set it in the console under **Keys & settings**). |
@@ -190,6 +190,8 @@ Fabric Peers:
   * db-1                 -> 100.64.0.20     online, direct
 ```
 
+- `Controller:` is the controller that this node reached. A node that joined through `fabric.zqxnet.com` shows the controller of its xnet, not `fabric.zqxnet.com`.
+- A node that the controller refused shows why, for example "This key was used already", and what to do: make a new key in the console, then run `zqx up --auth-key <key>`.
 - `Controller Key:` is the controller node ID that this node pins. Before the first connection it shows `not pinned yet`. Refer to [Controller pinning](#controller-pinning).
 - `Recovery Key:` is the controller recovery key that this node pins, when it has one.
 - `Controller Set:` shows the controllers of this node's xnet, when the controller sends a set: its epoch and serial, and each controller with its role and address. Refer to [Controller sets](#controller-sets).
