@@ -243,7 +243,7 @@ With `--json`, a peer that is not in use has `"listed": true` and an empty `id`.
 | --- | --- |
 | `dialed`, `accepted`, `lane` | Who opened the connection: this node, the peer, or a lane (an extra connection for more cores) |
 | `direct <address>`, `relay` | The path, and the peer's address on a direct path |
-| `rtt` | The smoothed round trip. Far above the path's round trip (`zqx ping`), it shows a queue on the way |
+| `rtt` | The smoothed round trip. On a quiet connection it includes up to 25 ms that the peer waits before it acknowledges, so it can be above `zqx ping` on a fast path. Far above `zqx ping` during a transfer, it shows a queue on the way |
 | `window` | The congestion window: how much data can be in flight. A transfer is at most window ÷ round trip |
 | `lost`, `congestion events` | Packets lost on the path, and how often the sender reduced its window |
 | `mtu` | The packet size in use |
@@ -263,7 +263,6 @@ zqx ping <name, fabric IP or node ID>
 | --- | --- |
 | `-c, --count <n>` | The number of pings (default 4) |
 | `--until-direct` | Stop when the connection is direct |
-| `-v, --verbose` | Show the time for each hop through the relay |
 
 ```text
 pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 16ms [X25519MLKEM768]
@@ -273,6 +272,7 @@ pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 14ms [X25519MLKEM768]
 ```
 
 - The peer's `zqxd` (or `zqxnode` app) answers each ping. `zqx ping` counts a reply only when that answer arrives. Thus the times and the losses are real.
+- The time is the measured round trip of each ping, through the relay too.
 - `zqx ping` works to all peers, with or without a virtual adapter. It also works from a node without one.
 - It exits with status `1` when no ping gets a reply. You can use it as a health check: `zqx ping -c 1 db-1 || exit 1`.
 

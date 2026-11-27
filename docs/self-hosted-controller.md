@@ -113,6 +113,7 @@ docker image prune -a --filter "label=org.opencontainers.image.title=ZQX control
 - It lasts 90 days. ZQX renews it while the controller is connected, from 30 days before it expires.
 - The controller's log warns from 14 days before it expires.
 - After it expires, the controller admits no new nodes and no new xnets. Nodes that joined stay connected. Connect the controller to ZQX again to renew it.
+- The console's **Plan & licences** page shows the licence, when it expires and whether it renews. From 30 days before it expires, while the controller is not connected, the page shows a warning with the date.
 
 **The recovery key:** the controller keeps a recovery key in its volume, and nodes pin it. Optional: keep a copy apart.
 
