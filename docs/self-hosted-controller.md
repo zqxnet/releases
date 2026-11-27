@@ -43,7 +43,7 @@ To use your own configuration, set `ZQX_SAAS_TOKEN` to the token. Refer to [Sett
 - Keep it like a password until it is used. After that it does nothing: the controller keeps its licence in its volume.
 - The console shows it once. **Make a new token** replaces it, and **Revoke token** stops it.
 
-**The name:** the controller takes the machine's host name. To give another name, set `ZQX_CONTROLLER_NAME`.
+**The name:** the controller takes the machine's host name. To give another name, use **Rename…** in the controller's actions on the Controllers page, or set `ZQX_CONTROLLER_NAME`.
 
 **To check on the machine:**
 
@@ -62,7 +62,9 @@ The controller finds the address itself, from the machine's route to the interne
 | A public address of its own | That public address |
 | A private address only | Its private address. Only nodes in that network reach it |
 
-**To give another address** (a DNS name, a port forward or a load balancer), set `ZQX_PUBLIC_ADDR` on the controller, for example `ZQX_PUBLIC_ADDR=ctrl.example.com` or `ZQX_PUBLIC_ADDR=203.0.113.24:8443`. Then start the controller again.
+**To give another address** (a DNS name, a port forward or a load balancer):
+- **In the console:** on the Controllers page, open the controller's actions, click **Change address…**, choose **An address you set**, and enter it, for example `ctrl.example.com` or `203.0.113.24:8443`. Connected nodes get it within a minute. **The one the controller finds** goes back to the found address.
+- **On the controller:** set `ZQX_PUBLIC_ADDR`, for example `ZQX_PUBLIC_ADDR=ctrl.example.com`, then start the controller again. The console can't change an address set this way.
 
 ## Settings
 
@@ -149,7 +151,7 @@ docker image prune -a --filter "label=org.opencontainers.image.title=ZQX control
 | The console still says it is waiting | Check the outbound HTTPS connection to `fabric.zqxnet.com`, and `docker logs zqx-controller` |
 | "This connection token was used already", "expired" or "was revoked" | In the console, click **Add your own controller** again for a new token, and start the controller with it |
 | The log says "ZQX now needs" a version | Update the controller (above) |
-| Nodes cannot join | Check that UDP and TCP port 443 reach the machine from the nodes. For nodes outside its network, set `ZQX_PUBLIC_ADDR` |
+| Nodes cannot join | Check that UDP and TCP port 443 reach the machine from the nodes. For nodes outside its network, use **Change address…** or set `ZQX_PUBLIC_ADDR` |
 | "Your plan includes one controller, and … is connected" | Stop that controller first, then make a new token |
 | "Your controller holds 2 xnets" | Delete an xnet on it, or upgrade the plan |
 
