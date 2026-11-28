@@ -66,6 +66,8 @@ The controller finds the address itself, from the machine's route to the interne
 - **In the console:** on the Controllers page, open the controller's actions, click **Change address…**, choose **An address you set**, and enter it, for example `ctrl.example.com` or `203.0.113.24:8443`. Connected nodes get it within a minute. **The one the controller finds** goes back to the found address.
 - **On the controller:** set `ZQX_PUBLIC_ADDR`, for example `ZQX_PUBLIC_ADDR=ctrl.example.com`, then start the controller again. The console can't change an address set this way.
 
+**IPv6:** the controller listens on IPv6 and IPv4. The address it finds is the IPv4 one when the machine has IPv4. For nodes on IPv6-only networks, give a DNS name with both an IPv4 (A) and an IPv6 (AAAA) record: nodes then try both and use the first that answers. An IP address reaches one family only.
+
 ## Settings
 
 The examples in the console set these values. Set them in your own configuration in the same way.

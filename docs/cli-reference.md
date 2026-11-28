@@ -284,15 +284,19 @@ pong from node2 (100.64.0.3) via 203.0.113.7:24310 in 14ms [X25519MLKEM768]
 
 ### `zqx netcheck`
 
-Check the network: UDP, TLS over TCP 443, the STUN server and the relay. The report includes the NAT mapping of the peer port, measured from the peer socket.
+Check the network: UDP, TLS over TCP 443, the STUN server and the relay. The report includes the NAT mapping of the peer port, measured from the peer socket, and the node's IPv6 address as a STUN server sees it.
 
 ```text
   * UDP:               true
   * TCP 443 (TLS):     true (649ms)
   * NAT Mapping:       Port-changing (peer port 24310 appears as 51877)
   * Public Endpoint:   198.51.100.23:51877
+  * IPv6:              [2001:db8:10::23]:24310
   * STUN Server:       203.0.113.10:443 (210ms)
 ```
+
+- **IPv6:** "no answer" when the node has no IPv6 route, or no STUN server has an IPv6 address. On an IPv6-only network the public endpoint is the IPv6 one.
+- The node dials every address of a name, IPv6 and IPv4, and uses the first that answers: a family that does not work costs about a quarter of a second.
 
 ### `zqx ip`
 
