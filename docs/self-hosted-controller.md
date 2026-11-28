@@ -161,6 +161,18 @@ If a removed controller starts again, ZQX refuses it, and its log says what to r
 | TCP 443 | Inbound, from your nodes | Your nodes on networks that block UDP |
 | TCP 443 | Outbound | The connection to `fabric.zqxnet.com`, and the image from `ghcr.io` |
 
+## Check the setup
+
+Run the check on the controller's machine. It reads the controller's settings and changes nothing:
+
+```sh
+docker exec zqx-controller zqx-control check
+```
+
+It checks the controller's listen address, its DNS records against the addresses its STUN servers see, its STUN servers, free disk and the UDP receive buffer. Then it dials the controller's address as a node would: QUIC, TLS and STUN at every address of the name, and its relay. Each line says pass, warning, failure or skipped, and gives the fix for each warning and failure. It exits with code 1 if a check fails.
+
+A dial from the machine itself does not show what a firewall in front of it blocks. Check that UDP and TCP port 443 reach it from your nodes' networks too.
+
 ## Problems
 
 | What you see | What to do |
